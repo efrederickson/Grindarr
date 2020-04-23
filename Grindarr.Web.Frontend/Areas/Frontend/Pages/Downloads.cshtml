@@ -1,0 +1,58 @@
+﻿@page
+@model Grindarr.Web.Frontend.Pages.DownloadsModel
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Page1</title>
+</head>
+<body>
+    <table id="downloadTable" class="downloadTable">
+        <thead>
+            <tr>Name</tr>
+            <tr>Progress</tr>
+            <tr>Speed</tr>
+            <tr>State</tr>
+            <tr>Source URL</tr>
+        </thead>
+        <tr>
+            <td>Ubuntu 18.04 x64</td>
+            <td>4.00%</td>
+            <td>0KB/s</td>
+            <td>Pending</td>
+            <td>https://conic.com/ub.iso</td>
+        </tr>
+        <tr>
+            <td>Ubuntu 20.04 x64</td>
+            <td>56.78%</td>
+            <td>999MB/s</td>
+            <td>Downloading</td>
+            <td>https://conic.com/ub.iso</td>
+        </tr>
+    </table>
+
+    <script>
+        (function () {
+
+            setInterval(function () {
+                $('#downloadTable tr').remove(); // Preserve header
+
+                grindarr.getDownloads(function (data) {
+                    $(data).each(function (key, dl) {
+                        var newEntry = $('<tr>');
+                        $('<td>').text(dl.content.title).appendTo(newEntry);
+                        $('<td>').text(dl.progress.percentage).appendTo(newEntry);
+                        $('<td>').text(dl.progress.downloadSpeed).appendTo(newEntry);
+                        $('<td>').text(dl.progress.status).appendTo(newEntry);
+                        $('<td>').text(dl.downloadUri).appendTo(newEntry);
+                        $('#downloadTable').append(newEntry);
+                    });
+                })
+
+            }, 5000);
+        })();
+    </script>
+</body>
+</html>
