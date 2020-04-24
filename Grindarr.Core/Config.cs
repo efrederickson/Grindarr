@@ -79,6 +79,8 @@ namespace Grindarr.Core
             get => _config.StalledDownloadCutoff; 
             set
             {
+                if (value < 0)
+                    value = 0;
                 _config.StalledDownloadCutoff = value;
                 Save();
             }
@@ -142,6 +144,9 @@ namespace Grindarr.Core
                 IgnoreStalledDownloads = newConfig.IgnoreStalledDownloads;
             if (newConfig.StalledDownloadCutoff.HasValue)
                 StalledDownloadCutoff = newConfig.StalledDownloadCutoff;
+
+            if (newConfig.CustomSections != null && newConfig.CustomSections.Count > 0)
+                Console.WriteLine("Ignoring merge for custom option section with values set");
         }
 
         public BareConfig GetBareConfig() => _config;
