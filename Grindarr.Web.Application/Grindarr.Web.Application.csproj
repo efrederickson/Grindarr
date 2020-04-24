@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper.csproj" />
     <ProjectReference Include="..\Grindarr.Web.Api.Authorization\Grindarr.Web.Api.Authorization.csproj" />
     <ProjectReference Include="..\Grindarr.Web.Api\Grindarr.Web.Api.csproj" />
     <ProjectReference Include="..\Grindarr.Web.Frontend\Grindarr.Web.Frontend.csproj" />
