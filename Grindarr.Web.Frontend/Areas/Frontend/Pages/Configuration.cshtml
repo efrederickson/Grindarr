@@ -1,0 +1,185 @@
+﻿@page
+@model Grindarr.Web.Frontend.Areas.Frontend.Pages.ConfigurationModel
+<div class="centered-config-label-text">Core Config</div>
+<table id="configTable" class="config-table">
+    <tr>
+        <th>Name</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td>Folder for in-progress downloads</td>
+        <td class="value-td"><input type="text" class="form-control" onchange="saveInProgressDownloadsFolderChanges()" id="inProgressDownloadsFolder" /></td>
+    </tr>
+    <tr>
+        <td>Folder for completed downloads</td>
+        <td class="value-td"><input type="text" class="form-control" onchange="saveCompletedDownloadsFolderChanges()" id="completedDownloadsFolder" /></td>
+    </tr>
+    <tr>
+        <td>Ignore Stalled Downloads</td>
+        <td class="value-td"><input type="checkbox" onchange="saveIgnoreStalledDownloadsChanges()" id="ignoreStalledDownloads" /></td>
+    </tr>
+    <tr>
+        <td>Stalled Download Cutoff (Byte/s)</td>
+        <td class="value-td"><input type="number" class="form-control" onchange="saveStalledCutoffChanges()" id="stalledDownloadCutoff" /></td>
+    </tr>
+</table>
+
+<div class="centered-config-label-text">Post Processors</div>
+<ul id="postProcessors" class="list-group basic-list"></ul>
+
+<div class="centered-config-label-text">Scrapers</div>
+<ul id="scrapers" class="list-group basic-list"></ul>
+
+<script>
+    function showSaveSuccess(jqElem) {
+        var elem = $('<p>', { class: 'save-success-check save-success-check-fadein' });
+        elem.html("&#10004;");
+        elem.appendTo(jqElem.parent()); // Add to parent td, not the input
+        setTimeout(function () {
+            elem.removeClass("save-success-check-fadein");
+            elem.addClass("save-success-check-fadeout");
+            setTimeout(function () {
+                elem.remove();
+            }, 750);
+        }, 750);
+    }
+
+    function saveInProgressDownloadsFolderChanges() {
+        var value = $("#inProgressDownloadsFolder").val();
+        grindarr.config.setInProgressDownloadsFolder(value, function (data, err) {
+            if (err == null) {
+                showSaveSuccess($("#inProgressDownloadsFolder"));
+            } else {
+                alert("Failed to save setting: " + err.errorMessage);
+            }
+        });
+    }
+
+    function saveCompletedDownloadsFolderChanges() {
+        var value = $("#completedDownloadsFolder").val();
+        grindarr.config.setCompletedDownloadsFolder(value, function (data, err) {
+            if (err == null) {
+                showSaveSuccess($("#completedDownloadsFolder"));
+            } else {
+                alert("Failed to save setting: " + err.errorMessage);
+            }
+        });
+    }
+
+    function saveIgnoreStalledDownloadsChanges() {
+        var value = $("#ignoreStalledDownloads").is(":checked");
+        grindarr.config.setIgnoreStalledDownloads(value, function (data, err) {
+            if (err == null) {
+                showSaveSuccess($("#ignoreStalledDownloads"));
+            } else {
+                alert("Failed to save setting: " + err.errorMessage);
+            }
+        });
+    }
+
+    function saveStalledCutoffChanges() {
+        var value = $("#stalledDownloadCutoff").val();
+        value = parseInt(value);
+        grindarr.config.setStalledDownloadCutoff(value, function (data, err) {
+            if (err == null) {
+                showSaveSuccess($("#stalledDownloadCutoff"));
+            } else {
+                alert("Failed to save setting: " + err.errorMessage);
+            }
+        });
+    }
+
+    function updatePostProcessorList() {
+        var ppHolder = $('#postProcessors');
+        ppHolder.empty();
+
+        $.each(grindarr.postProcessors.getPostProcessors(), function (id, pp) {
+            var entryText = pp.title;
+            if (pp.mandatory) {
+                entryText += " (Mandatory)";
+            }
+            var entry = $('<div>', { class: "config-pp-section" });
+
+            var enabledSection = $('<div>', { class: "config-pp-enabled-section", text: "Enabled" });
+            var enabledCheck = $('<input>', { type: "checkbox" });
+            enabledCheck.attr('disabled', pp.mandatory);
+            enabledCheck.prop("checked", pp.enabled);
+            enabledCheck.change(function () {
+                grindarr.postProcessors.updatePostProcessor(id, enabledCheck.is(":checked"), function (data, errData) {
+                    if (errData != null) {
+                        alert("Failed to update post processor: " + errData.errorMessage);
+                    }
+                });
+            });
+
+            enabledCheck.appendTo(enabledSection);
+            enabledSection.appendTo(entry);
+
+            $('<div>', { class: "config-pp-title", text: entryText }).appendTo(entry);
+            $('<div>', { class: "config-pp-desc", text: pp.description }).appendTo(entry);
+
+            var li = $('<li>');
+            entry.appendTo(li);
+            li.appendTo(ppHolder);
+        });
+    }
+
+    function updateScraperList() {
+        var scraperHolder = $('#scrapers');
+        scraperHolder.empty();
+
+        $.each(grindarr.scrapers.getScrapers(), function (id, scraper) {
+            var li = $('<li>', { class: "config-scraper-item" });
+            var entry = $('<div>');
+
+            $('<button>', { class: "btn btn-danger float-right", text: "Delete" }).click(function () {
+                if (confirm("Delete this scraper?")) {
+                    grindarr.scrapers.deleteScraper(id);
+                    updateScraperList();
+                }
+            }).appendTo(entry);
+
+            $('<div>', { text: "Name: " + grindarr.scrapers.parseName(scraper.className) }).appendTo(entry);
+            $('<div>', { text: "Arguments: [ " + scraper.arguments.join(", ") + " ]" }).appendTo(entry);
+
+            entry.appendTo(li);
+            li.appendTo(scraperHolder);
+        });
+
+        $.each(grindarr.scrapers.getAvailableScrapers(), function (id, scraper) {
+            var li = $('<li>', { class: "config-scraper-item" });
+            var entry = $('<div>');
+
+            var argEntryBox = $('<input>', {
+                type: "text",
+                class: "form-control scraper-textbox",
+                placeholder: "Scraper argument, hope you know what it is"
+            });
+
+            $('<button>', { class: "btn btn-success float-right", text: "Create" }).click(function () {
+                var className = scraper;
+                var args = [argEntryBox.val()];
+                grindarr.scrapers.configureScraper(className, args, function (data, errData) {
+                    if (errData == null) {
+                        updateScraperList();
+                    }
+                });
+            }).appendTo(entry);
+            argEntryBox.appendTo(entry);
+            $('<div>', { text: "Name: " + scraper }).appendTo(entry);
+
+            entry.appendTo(li);
+            li.appendTo(scraperHolder);
+        });
+    }
+
+    (function () {
+        $("#inProgressDownloadsFolder").val(grindarr.config.getInProgressDownloadsFolder());
+        $("#completedDownloadsFolder").val(grindarr.config.getCompletedDownloadsFolder());
+        $("#ignoreStalledDownloads").prop('checked', grindarr.config.getIgnoreStalledDownloads());
+        $("#stalledDownloadCutoff").val(grindarr.config.getStalledDownloadCutoff());
+
+        updatePostProcessorList();
+        updateScraperList();
+    })();
+</script>

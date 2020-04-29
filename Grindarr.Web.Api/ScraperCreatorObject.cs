@@ -9,5 +9,7 @@ namespace Grindarr.Web.Api
     {
         public string ClassName { get; set; }
         public IEnumerable<string> Arguments { get; set; }
+
+        public uint ArgumentCount { get; set; }
     }
 }

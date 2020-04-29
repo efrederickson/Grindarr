@@ -16,7 +16,7 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
         public NginxOpenDirectoryScraper(Uri rootFolderUri) => this.rootFolderUri = rootFolderUri;
         public NginxOpenDirectoryScraper(String rootFolderUriStr) : this(new Uri(rootFolderUriStr)) { }
 
-        public int GetConstructorArgumentCount() => 1;
+        public uint GetConstructorArgumentCount() => 1;
 
         public IEnumerable<string> GetSerializableConstructorArguments() => new string[] { rootFolderUri.ToString() };
 
@@ -53,10 +53,17 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
             var responseBodyText = httpResponse.Content.ReadAsStringAsync();
             var document = new HtmlDocument();
             document.LoadHtml(await responseBodyText);
+            bool first = true;
 
             var linkNodes = document.DocumentNode.Descendants("a");
             foreach (var linkNode in linkNodes)
             {
+                // Skip header
+                if (first)
+                {
+                    first = false;
+                    continue;
+                }
                 var relativeLink = linkNode.Attributes["href"].Value;
                 var completeUri = dir.ToString().EndsWith("/") || relativeLink.StartsWith("/")
                     ? new Uri(dir + relativeLink)
@@ -82,7 +89,7 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
                 if (DateTime.TryParse(dateText, out DateTime dateTimeParsed))
                     item.DatePosted = dateTimeParsed;
 
-                if (long.TryParse(sizeText, out long sizeParsed))
+                if (ulong.TryParse(sizeText, out ulong sizeParsed))
                     item.ReportedSizeInBytes = sizeParsed;
 
                 res.Add(item);

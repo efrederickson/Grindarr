@@ -1,0 +1,112 @@
+﻿@page
+@model Grindarr.Web.Frontend.Areas.Frontend.Pages.ManualSearchModel
+
+<div class="input-group">
+    <input type="text" class="form-control" id="searchTextField" />
+    <button class="btn btn-success" id="searchButton">Search</button>
+</div>
+
+<table id="searchTable" class="search-table">
+    <tr>
+        <th onclick="sortTable('searchTable', 0)">Title</th>
+        <th onclick="sortTable('searchTable', 1)">Date Posted</th>
+        <th onclick="sortTable('searchTable', 2)">Source</th>
+        <th onclick="sortTable('searchTable', 3)">Reported Size</th>
+        <th onclick="sortTable('searchTable', 4)">Download Links</th>
+    </tr>
+</table>
+
+<script type="text/javascript">
+
+    $("#searchTextField").keyup(function (event) {
+        if (event.keyCode === 13) {
+            $("#searchButton").click();
+        }
+    });
+
+    $("#searchButton").click(function () {
+        var queryStr = $("#searchTextField").val();
+
+        $('<div>', { class: "loader", id: "loader" }).appendTo($("#searchButton"));
+        $("#searchButton").prop('disabled', true);
+        $("#searchButton").addClass('disabled');
+
+        grindarr.actions.search(queryStr, function (data, errData) {
+            $("#loader").remove();
+            $("#searchButton").prop('disabled', false);
+            $("#searchButton").removeClass('disabled');
+
+            if (errData == null) {
+                displaySearchResults(data);
+            } else {
+                var fakeItem = $('<tr>');
+
+                $('<td>', { text: "Error searching: " + errData.errorMessage }).appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
+
+                fakeItem.appendTo($("#searchTable"));
+            }
+        });
+    });
+
+    function displaySearchResults(data) {
+        var searchTable = $("#searchTable");
+        $("#searchTable tr").not(":first").remove(); // Preserve header
+
+        // Add items
+        $.each(data, function (idx, entry) {
+            var tr = $('<tr>');
+
+            $('<td>', { text: entry.title }).appendTo(tr);
+            $('<td>', { text: entry.datePosted }).appendTo(tr);
+            var sourceLink = $('<a>');
+            sourceLink.attr("href", entry.source);
+            sourceLink.attr("title", entry.source);
+            sourceLink.attr("target", "_blank");
+            sourceLink.text(entry.source);
+            var sourceLinkTd = $('<td>');
+            sourceLink.appendTo(sourceLinkTd);
+            sourceLinkTd.appendTo(tr);
+
+            var sizeTd = $('<td>', { text: grindarr.bytesToHumanReadableString(entry.reportedSizeInBytes, true) });
+            sizeTd.attr("sort-value", entry.reportedSizeInBytes);
+            sizeTd.attr("sort-type", "number");
+            sizeTd.appendTo(tr);
+
+            var dlLinksTd = $('<td>');
+            $.each(entry.downloadLinks, function (k, link) {
+                var linkElement = $('<a>');
+                linkElement.attr("href", "#");
+                linkElement.attr("title", link);
+                linkElement.text(link);
+                linkElement.click(function () {
+                    var contentItem = $.extend({}, entry);
+                    contentItem.downloadLinks = [link];
+
+                    grindarr.createDownload(contentItem, function (data, errData) {
+                        if (errData == null) {
+                            var elem = $('<p>', { class: 'create-download-check save-success-check-fadein' });
+                            elem.html("&#10004;");
+                            elem.appendTo(linkElement);
+                            setTimeout(function () {
+                                elem.removeClass("save-success-check-fadein");
+                                elem.addClass("save-success-check-fadeout");
+                                setTimeout(function () {
+                                    elem.remove();
+                                }, 750);
+                            }, 750);
+                        } else {
+                            alert("Failed to create download: " + errData.errorMessage);
+                        }
+                    });
+                });
+                linkElement.appendTo(dlLinksTd);
+            });
+            dlLinksTd.appendTo(tr);
+
+            tr.appendTo(searchTable);
+        });
+    }
+</script>

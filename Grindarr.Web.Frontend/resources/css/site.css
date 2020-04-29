@@ -1,3 +1,60 @@
-﻿.downloadTable {
+﻿html, body {
+    height: 100%;
+}
+
+.float-right {
+    float: right;
+}
+
+.scraper-textbox {
+    width: 40%;
+    display: inline;
+    float: right;
+}
+
+.body-container {
+    min-height: 80vh;
+    max-width: unset;
+
+    /* Same as left/right */
+    padding-top: 15px;
+    padding-bottom: 15px;
+
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.footer-text {
+    font-size: .8em;
+    text-align: center;
+}
+
+.downloadTable {
     width: 100%;
+    border-collapse: collapse;
+    border: 1px solid white;
+}
+
+.downloadTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.navbar-items {
+    margin-left: 1em;
+}
+
+.grindarr-logo {
+    display: flex;
+    flex-flow: row;
+    font-size: 1.5em;
+}
+
+.grindarr-logo-left {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 100;
+}
+
+.grindarr-logo-right {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 400;
 }

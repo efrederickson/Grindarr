@@ -25,6 +25,9 @@
   </ItemGroup>
   
   <ItemGroup>
+    <None Remove="resources\css\config.css" />
+    <None Remove="resources\css\search.css" />
+    <None Remove="resources\css\theme.css" />
     <None Remove="resources\js\grindarr.js" />
   </ItemGroup>
 

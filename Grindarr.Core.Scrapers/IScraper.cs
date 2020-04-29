@@ -22,6 +22,6 @@ namespace Grindarr.Core.Scrapers
         /// Returns the number of arguments needed for the constructor, see <see cref="GetSerializableConstructorArguments"/>
         /// </summary>
         /// <returns></returns>
-        public int GetConstructorArgumentCount();
+        public uint GetConstructorArgumentCount();
     }
 }

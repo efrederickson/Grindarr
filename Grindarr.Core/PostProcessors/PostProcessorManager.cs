@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Grindarr.Core.PostProcessors
@@ -21,22 +22,19 @@ namespace Grindarr.Core.PostProcessors
         }
 
         /// <summary>
-        /// This method is used to safely update the enabled state of a post processor registered to this PostProcessorManager. 
-        /// It returns a boolean equivalent to whether the enabled state was updated or not. If false, it may be because 
-        /// the post processor given is not assigned to this PostProcessorManager or the post processor is marked as mandatory. 
-        /// Note: updating the enableState to 'false' will return 'true' because it successfully updated the state. 
+        /// This method is used to update the enabled state of a post processor registered to this PostProcessorManager.
+        /// It will raise an exception if the post processor cannot be safely updated (e.g. it's mandatory). 
         /// </summary>
         /// <param name="pp"></param>
         /// <param name="enableState"></param>
         /// <returns></returns>
-        public bool SetPostProcessorEnableState(IPostProcessor pp, bool enableState)
+        public void SetPostProcessorEnableState(IPostProcessor pp, bool enableState)
         {
             if (!PostProcessors.Contains(pp))
-                return false;
+                throw new InvalidOperationException($"Post Processor {pp} does not belong to this manager");
             if (pp.Mandatory)
-                return false;
+                throw new InvalidOperationException("Unable to change the enabled state of a mandatory post processor");
             pp.Enabled = enableState;
-            return true;
         }
     }
 }

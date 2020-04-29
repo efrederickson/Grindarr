@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Web.Api", "Grindar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Web.Api.Authorization", "Grindarr.Web.Api.Authorization\Grindarr.Web.Api.Authorization.csproj", "{7B4A81FE-23A2-4242-817E-13F86A933885}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grindarr.Web.Frontend", "Grindarr.Web.Frontend\Grindarr.Web.Frontend.csproj", "{BD78FFEF-190B-4778-A780-4ED7FCC5FCFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Web.Frontend", "Grindarr.Web.Frontend\Grindarr.Web.Frontend.csproj", "{BD78FFEF-190B-4778-A780-4ED7FCC5FCFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grindarr.Core.Tests", "Grindarr.Core.Tests\Grindarr.Core.Tests.csproj", "{C8FA4086-A779-48FD-A271-0A9B9319FFD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +69,10 @@ Global
 		{BD78FFEF-190B-4778-A780-4ED7FCC5FCFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD78FFEF-190B-4778-A780-4ED7FCC5FCFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD78FFEF-190B-4778-A780-4ED7FCC5FCFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8FA4086-A779-48FD-A271-0A9B9319FFD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8FA4086-A779-48FD-A271-0A9B9319FFD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8FA4086-A779-48FD-A271-0A9B9319FFD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8FA4086-A779-48FD-A271-0A9B9319FFD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

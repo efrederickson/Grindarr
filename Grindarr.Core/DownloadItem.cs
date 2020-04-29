@@ -25,7 +25,7 @@ namespace Grindarr.Core
         /// </summary>
         public string CompletedFilename { get; set; }
 
-        public DownloadProgress Progress { get; internal set; }
+        public DownloadProgress Progress { get; set; }
 
         public DownloadItem(ContentItem item, Uri dlUri)
         {

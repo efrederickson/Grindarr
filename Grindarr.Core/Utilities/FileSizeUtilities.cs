@@ -6,7 +6,7 @@ namespace Grindarr.Core.Utilities
 {
     public static class FileSizeUtilities
     {
-        private readonly static Dictionary<char, long> suffixToMultiplierMap = new Dictionary<char, long>
+        private readonly static Dictionary<char, ulong> suffixToMultiplierMap = new Dictionary<char, ulong>
         {
             ['K'] = 1024L,
             ['M'] = 1024L * 1024L,
@@ -14,14 +14,16 @@ namespace Grindarr.Core.Utilities
             ['T'] = 1024L * 1024L * 1024L * 1024L
         };
 
-        public static long ParseFromSuffixedString(string str)
+        public static ulong ParseFromSuffixedString(string str)
         {
             StringBuilder numbers = new StringBuilder();
             char? sizeChar = null;
-            foreach (char c in str)
+            foreach (char c in str.Trim())
             {
-                if (char.IsDigit(c))
+                if (char.IsDigit(c) || c == '.')
                     numbers.Append(c);
+                else if (char.IsWhiteSpace(c))
+                    continue;
                 else
                 {
                     sizeChar = char.ToUpper(c);
@@ -32,10 +34,10 @@ namespace Grindarr.Core.Utilities
             if (!sizeChar.HasValue || !suffixToMultiplierMap.ContainsKey(sizeChar.Value) || numbers.Length == 0)
                 return 0;
 
-            long multiplier = suffixToMultiplierMap[sizeChar.Value];
+            ulong multiplier = suffixToMultiplierMap[sizeChar.Value];
 
-            long value = long.Parse(numbers.ToString());
-            return value * multiplier;
+            double value = double.Parse(numbers.ToString());
+            return (ulong)Math.Floor(value * multiplier);
         }
     }
 }

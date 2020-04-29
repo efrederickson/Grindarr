@@ -14,7 +14,9 @@ namespace Grindarr.Web.Api.Controllers
         [HttpGet]
         public ActionResult<Config.BareConfig> Index()
         {
-            return new ActionResult<Config.BareConfig>(Config.Instance.GetBareConfig());
+            var cfg = Config.Instance.GetBareConfig().Clone();
+            cfg.CustomSections = null; // TODO
+            return new ActionResult<Config.BareConfig>(cfg);
         }
         
         [HttpPut]

@@ -16,7 +16,8 @@ namespace Grindarr.Web.Api.Controllers
             return new ScraperCreatorObject
             {
                 ClassName = value.GetType().AssemblyQualifiedName,
-                Arguments = value.GetSerializableConstructorArguments()
+                Arguments = value.GetSerializableConstructorArguments(),
+                ArgumentCount = value.GetConstructorArgumentCount()
             };
         }
 

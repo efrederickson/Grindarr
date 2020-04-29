@@ -1,58 +1,123 @@
 ﻿@page
 @model Grindarr.Web.Frontend.Pages.DownloadsModel
 
-<!DOCTYPE html>
+<table id="downloadTable" class="downloadTable">
+    <tr>
+        <th onclick="sortTable('downloadTable', 0)">Name</th>
+        <th onclick="sortTable('downloadTable', 1)">Size</th>
+        <th onclick="sortTable('downloadTable', 2)">Progress</th>
+        <th onclick="sortTable('downloadTable', 3)">Speed</th>
+        <th onclick="sortTable('downloadTable', 4)">State</th>
+        <th onclick="sortTable('downloadTable', 5)">Source URL</th>
+        <th onclick="sortTable('downloadTable', 6)">Actions</th>
+    </tr>
+</table>
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Page1</title>
-</head>
-<body>
-    <table id="downloadTable" class="downloadTable">
-        <thead>
-            <tr>Name</tr>
-            <tr>Progress</tr>
-            <tr>Speed</tr>
-            <tr>State</tr>
-            <tr>Source URL</tr>
-        </thead>
-        <tr>
-            <td>Ubuntu 18.04 x64</td>
-            <td>4.00%</td>
-            <td>0KB/s</td>
-            <td>Pending</td>
-            <td>https://conic.com/ub.iso</td>
-        </tr>
-        <tr>
-            <td>Ubuntu 20.04 x64</td>
-            <td>56.78%</td>
-            <td>999MB/s</td>
-            <td>Downloading</td>
-            <td>https://conic.com/ub.iso</td>
-        </tr>
-    </table>
+<script>
+    
+    (function () {
+        
+        var createDownloadEntry = function (data) {
+            var id = data.id;
+            var newEntry = $('<tr>', {
+                "content-id": id,
+            });
+            $('<td>', { id: id + "-title" }).appendTo(newEntry);
+            $('<td>', { id: id + "-totalSize" }).attr("sort-type", "number").appendTo(newEntry);
+            $('<td>', { id: id + "-percent" }).attr("sort-type", "number").appendTo(newEntry);
+            $('<td>', { id: id + "-downloadSpeed" }).attr("sort-type", "number").appendTo(newEntry);
+            $('<td>', { id: id + "-downloadStatus" }).appendTo(newEntry);
+            $('<td>', { id: id + "-downloadUrl" }).appendTo(newEntry);
+            var actionTd = $('<td>');
 
-    <script>
-        (function () {
+            $('<button>', {
+                class: 'btn btn-info',
+                text: 'Pause/Resume'
+            }).click(function () {
+                alert("⏸︎ / ► " + id);
+            }).appendTo(actionTd);
 
-            setInterval(function () {
-                $('#downloadTable tr').remove(); // Preserve header
-
-                grindarr.getDownloads(function (data) {
-                    $(data).each(function (key, dl) {
-                        var newEntry = $('<tr>');
-                        $('<td>').text(dl.content.title).appendTo(newEntry);
-                        $('<td>').text(dl.progress.percentage).appendTo(newEntry);
-                        $('<td>').text(dl.progress.downloadSpeed).appendTo(newEntry);
-                        $('<td>').text(dl.progress.status).appendTo(newEntry);
-                        $('<td>').text(dl.downloadUri).appendTo(newEntry);
-                        $('#downloadTable').append(newEntry);
+            $('<button>', {
+                class: 'btn btn-danger',
+                text: 'Delete'
+            }).click(function () {
+                if (confirm("Are you sure you want to cancel this download?")) {
+                    grindarr.cancelDownload(id, function (data, errData) {
+                        if (errData != null) {
+                            alert("Failed to delete download: " + errData.errorMessage);
+                        }
                     });
-                })
+                }
+            }).appendTo(actionTd);
 
-            }, 5000);
-        })();
-    </script>
-</body>
-</html>
+            actionTd.appendTo(newEntry);
+            $('#downloadTable').append(newEntry);
+            return newEntry;
+        }
+
+        var updateDownloadEntry = function (entry, data) {
+            var id = entry.attr("content-id");
+
+            $('#' + id + "-title").text(data.content.title);
+            $('#' + id + "-totalSize")
+                .attr("sort-value", data.progress.BytesTotal)
+                .text(grindarr.bytesToHumanReadableString(data.progress.bytesTotal, false));
+            $('#' + id + "-percent")
+                .attr("sort-value", data.progress.percentage)
+                .text((data.progress.percentage * 100).toFixed(2) + '%');
+            $('#' + id + "-downloadSpeed")
+                .attr("sort-value", data.progress.unformattedDownloadSpeed)
+                .text(data.progress.downloadSpeed);
+            $('#' + id + "-downloadStatus").text(grindarr.textForDownloadStatus(data.progress.status));
+            $('#' + id + "-downloadUrl").text(data.downloadUri);
+        }
+
+        var getOrCreateDownloadEntry = function (data) {
+            var existing = $('#downloadTable tr[content-id=' + data.id + ']');
+            if (existing.length == 0)
+                return createDownloadEntry(data);
+            return existing;
+        };
+
+        var updateDownloads = function () {
+
+            grindarr.getDownloads(function (data, errData) {
+
+                if (data != null) {
+                    // list of items to keep
+                    var download_ids = [];
+                    $(data).each(function (key, dl) {
+                        // Create or update table entry
+                        updateDownloadEntry(getOrCreateDownloadEntry(dl), dl);
+                        // Add to list of to-keep
+                        download_ids.push(dl.id);
+                    });
+                    $('#downloadTable tr').not(":first").each(function (k, child) {
+                        // If not in list of to-keep, remove the old table entry
+                        if (download_ids.indexOf(child.getAttribute('content-id')) < 0)
+                            child.remove();
+                    });
+
+                    if ($('#downloadTable tr').not(":first").length == 0) {
+                        var fakeItem = $('<tr>');
+                        $('<td>', { text: "No downloads right now" }).appendTo(fakeItem);
+                        for (i = 0; i < 6; i++) // add remaining fake td's
+                            $('<td>').appendTo(fakeItem);
+                        fakeItem.appendTo($('#downloadTable'));
+                    }
+                } else {
+                    $('#downloadTable tr').not(":first").remove(); // Preserve header
+                    var fakeItem = $('<tr>');
+                    $('<td>', { text: "Unable to communicate with backend" }).appendTo(fakeItem);
+                    for (i = 0; i < 6; i++) // add remaining fake td's
+                        $('<td>').appendTo(fakeItem);
+                    fakeItem.appendTo($('#downloadTable'));
+                }
+            })
+
+        };
+
+        setInterval(updateDownloads, 5000);
+        updateDownloads();
+    })();
+</script>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data.SqlTypes;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Grindarr.Core
@@ -22,6 +23,19 @@ namespace Grindarr.Core
             public double? StalledDownloadCutoff { get; set; }
 
             public Dictionary<string, dynamic> CustomSections { get; set; }
+
+            public BareConfig Clone()
+            {
+                var res = new BareConfig
+                {
+                    InProgressDownloadsFolder = InProgressDownloadsFolder,
+                    CompletedDownloadsFolder = CompletedDownloadsFolder,
+                    IgnoreStalledDownloads = IgnoreStalledDownloads,
+                    StalledDownloadCutoff = StalledDownloadCutoff,
+                    CustomSections = CustomSections.ToDictionary(entry => entry.Key, entry => entry.Value) // Shallow clone
+                };
+                return res;
+            }
         }
 
         private const string CONFIG_FILENAME = "config.json";
@@ -161,6 +175,7 @@ namespace Grindarr.Core
                 return defaultObj;
 
             var plainObj = CustomSections[key];
+            
             if (plainObj is JObject)
                 return ((JObject)plainObj).ToObject<T>();
             return (T)plainObj;

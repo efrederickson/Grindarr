@@ -21,7 +21,11 @@ namespace Grindarr.Web.Api.Controllers
         [HttpGet("{id}")]
         public ActionResult<IPostProcessor> Get(int id)
         {
-            return new ActionResult<IPostProcessor>(PostProcessorManager.Instance.PostProcessors[id]);
+            var postProcessors = PostProcessorManager.Instance.PostProcessors;
+            if (postProcessors.Count <= id)
+                return BadRequest("Invalid scraper index");
+            var target = postProcessors[id];
+            return new ActionResult<IPostProcessor>(target);
         }
 
         [HttpPatch("{id}")]
@@ -34,11 +38,20 @@ namespace Grindarr.Web.Api.Controllers
 
             bool newState = ((JsonElement)newStateObj).GetBoolean();
 
-            var pp = PostProcessorManager.Instance.PostProcessors[id];
-            var success = PostProcessorManager.Instance.SetPostProcessorEnableState(pp, newState);
-            if (success)
-                return Ok();
-            return BadRequest("Unable to reconfigure post processor");
+            var postProcessors = PostProcessorManager.Instance.PostProcessors;
+            if (postProcessors.Count <= id)
+                return BadRequest("Invalid scraper index");
+            var target = postProcessors[id];
+
+            try
+            {
+                PostProcessorManager.Instance.SetPostProcessorEnableState(target, newState);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest("Unable to reconfigure post processor: " + ex.Message);
+            }
+            return Ok();
         }
     }
 }

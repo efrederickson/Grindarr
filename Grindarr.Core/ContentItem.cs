@@ -29,6 +29,6 @@ namespace Grindarr.Core
         /// <summary>
         /// The reported size of the content from the source. May not be an accurate size.
         /// </summary>
-        public long ReportedSizeInBytes { get; set; }
+        public ulong ReportedSizeInBytes { get; set; }
     }
 }

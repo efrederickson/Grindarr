@@ -9,6 +9,8 @@ namespace Grindarr.Core
         public double Percentage => BytesTotal == 0 ? 0 : BytesDownloaded / (double)BytesTotal;
 
         public DownloadSpeedTracker SpeedTracker { get; protected set; } = new DownloadSpeedTracker(10, TimeSpan.FromMilliseconds(250));
+
+        public double UnformattedDownloadSpeed => SpeedTracker.GetBytesPerSecond();
         public string DownloadSpeed => SpeedTracker.GetBytesPerSecondString();
 
         public DateTime StartDate { get; set; }

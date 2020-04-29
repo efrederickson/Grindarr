@@ -5,22 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"
-            asp-fallback-href="~/css/bootstrap.min.css"
-            asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+          asp-fallback-href="~/css/bootstrap.min.css"
+          asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/config.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/search.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2020
-        </div>
-    </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"
             asp-fallback-src="~/js/jquery.min.js"
             asp-fallback-test="window.jQuery"
@@ -34,5 +27,36 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/grindarr.js"></script>
     @RenderSection("Scripts", required: false)
+
+    <header id="header">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <div class="grindarr-logo">
+                <span class="grindarr-logo-left">Grind</span>
+                <span class="grindarr-logo-right">arr</span>
+            </div>
+
+            <ul class="navbar-nav navbar-items mr-auto">
+                <li class="nav-item">
+                    <a class="btn btn-large" asp-page="/Downloads">Downloads</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-large" asp-page="/Configuration">Configuration</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-large" asp-page="/ManualSearch">Manual Search</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container body-container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="border-top fixed-bottom footer text-muted">
+        <div class="footer-text">
+            Grindarr &copy; 2020 Elijah Frederickson. Inspired during the Coronavirus.
+        </div>
+    </footer>
 </body>
 </html>

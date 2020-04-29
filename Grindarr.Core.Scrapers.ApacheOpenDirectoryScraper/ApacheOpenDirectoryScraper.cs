@@ -17,7 +17,7 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
         public ApacheOpenDirectoryScraper(Uri rootFolderUri) => this.rootFolderUri = rootFolderUri;
         public ApacheOpenDirectoryScraper(String rootFolderUriStr) : this(new Uri(rootFolderUriStr)) { }
 
-        public int GetConstructorArgumentCount() => 1;
+        public uint GetConstructorArgumentCount() => 1;
 
         public IEnumerable<string> GetSerializableConstructorArguments() => new string[] { rootFolderUri.ToString() };
 
@@ -55,11 +55,20 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
             var document = new HtmlDocument();
             document.LoadHtml(await responseBodyText);
 
+            bool first = true;
+
             var tables = document.DocumentNode.Descendants("table");
             foreach (var table in tables)
             {
                 foreach (var tableRow in table.Descendants("tr"))
                 {
+                    // If it's the header
+                    if (first)
+                    {
+                        first = false;
+                        continue;
+                    }
+
                     var linkNode = tableRow.ChildNodes.Descendants("a").FirstOrDefault();
                     if (linkNode == null)
                         continue;
