@@ -4,6 +4,11 @@ using System.Linq;
 
 namespace Grindarr.Core.Collections
 {
+    /// <summary>
+    /// This is a class to provide domain to <code>T</code> mappings, for example domain to <code>IDownloader</code>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TDefault"></typeparam>
     public abstract class DomainMapFactory<T, TDefault> where TDefault : T
     {
         protected static readonly Dictionary<string, Type> typeMap = new Dictionary<string, Type>();

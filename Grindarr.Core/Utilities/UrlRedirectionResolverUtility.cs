@@ -7,6 +7,11 @@ namespace Grindarr.Core.Utilities
 {
     public static class UrlRedirectionResolverUtility
     {
+        /// <summary>
+        /// This method will resolve Uri into its final destination Uri by following all 300-type HTTP redirects
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static async Task<Uri> ResolveAsync(Uri source)
         {
             // Due to how much this slows down responses (obviously), i've disabled it for now...

@@ -10,6 +10,9 @@ using System.Runtime.CompilerServices;
 
 namespace Grindarr.Core
 {
+    /// <summary>
+    /// Provides management of the Grindarr configuration
+    /// </summary>
     public class Config
     {
         /// <summary>
@@ -17,13 +20,32 @@ namespace Grindarr.Core
         /// </summary>
         public class BareConfig
         {
+            /// <summary>
+            /// The full path to the downloads folder for in-progress downloads
+            /// </summary>
             public string InProgressDownloadsFolder { get; set; }
+
+            /// <summary>
+            /// The full path to the downloads folder for complete downloads
+            /// </summary>
             public string CompletedDownloadsFolder { get; set; }
+
+            /// <summary>
+            /// Whether or not slow/stalled downloads should be ignored when counting active downloads
+            /// </summary>
             public bool? IgnoreStalledDownloads { get; set; }
+
+            /// <summary>
+            /// The speed cutoff for stalled downloads
+            /// </summary>
             public double? StalledDownloadCutoff { get; set; }
 
             public Dictionary<string, dynamic> CustomSections { get; set; }
 
+            /// <summary>
+            /// Provides a shallow clone of this BareConfig
+            /// </summary>
+            /// <returns></returns>
             public BareConfig Clone()
             {
                 var res = new BareConfig
@@ -38,12 +60,18 @@ namespace Grindarr.Core
             }
         }
 
+        /// <summary>
+        /// The filename for persistent configuratino
+        /// </summary>
         private const string CONFIG_FILENAME = "config.json";
 
         #region Settings Properties
 
         BareConfig _config = null;
 
+        /// <summary>
+        /// Provides access into custom sections for storing configuration information
+        /// </summary>
         public Dictionary<string, dynamic> CustomSections
         {
             get => _config.CustomSections ??= new Dictionary<string, dynamic>();
@@ -54,6 +82,9 @@ namespace Grindarr.Core
             }
         }
 
+        /// <summary>
+        /// The full path to the downloads folder for in-progress downloads
+        /// </summary>
         public string InProgressDownloadsFolder 
         {
             get => _config.InProgressDownloadsFolder;
@@ -66,6 +97,9 @@ namespace Grindarr.Core
             }
         }
 
+        /// <summary>
+        /// The full path to the downloads folder for completed downloads
+        /// </summary>
         public string CompletedDownloadsFolder 
         {
             get => _config.CompletedDownloadsFolder;
@@ -78,6 +112,9 @@ namespace Grindarr.Core
             }
         }
 
+        /// <summary>
+        /// Whether or not slow/stalled downloads should be ignored when counting active downloads
+        /// </summary>
         public bool? IgnoreStalledDownloads 
         {
             get => _config.IgnoreStalledDownloads;
@@ -88,6 +125,9 @@ namespace Grindarr.Core
             }
         }
 
+        /// <summary>
+        /// The speed cutoff for stalled downloads
+        /// </summary>
         public double? StalledDownloadCutoff 
         {
             get => _config.StalledDownloadCutoff; 
@@ -165,10 +205,24 @@ namespace Grindarr.Core
 
         public BareConfig GetBareConfig() => _config;
 
+        /// <summary>
+        /// Returns the custom section with the specified name, as the specified type.
+        /// </summary>
+        /// <typeparam name="T">Type the custom section is cast to</typeparam>
+        /// <param name="key">The name of the custom section</param>
+        /// <returns>The custom section</returns>
         public T GetCustomSection<T>(string key)
         {
             return GetCustomSection<T>(key, default);
         }
+
+        /// <summary>
+        /// Returns the custom section with the specified name, as the specified type.
+        /// </summary>
+        /// <typeparam name="T">Type the custom section is cast to</typeparam>
+        /// <param name="key">The name of the custom section</param>
+        /// <param name="defaultObj">The default object created if the custom section does not exist, default to <code>default(T)</code></param>
+        /// <returns>The custom section</returns>
         public T GetCustomSection<T>(string key, T defaultObj)
         {
             if (!CustomSections.ContainsKey(key))
@@ -181,6 +235,12 @@ namespace Grindarr.Core
             return (T)plainObj;
         }
 
+        /// <summary>
+        /// Sets the custom section to this value. 
+        /// Because it is dynamic, the value is not constrained to managed objects - it can be an int, bool, etc.
+        /// </summary>
+        /// <param name="key">The custom section key</param>
+        /// <param name="value">The value</param>
         public void SetCustomSection(string key, dynamic value)
         {
             CustomSections[key] = value;

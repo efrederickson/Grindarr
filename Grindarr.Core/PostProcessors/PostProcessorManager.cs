@@ -11,11 +11,19 @@ namespace Grindarr.Core.PostProcessors
 
         private PostProcessorManager()
         {
+            // TODO: move this somewhere better
             PostProcessors.Add(new MoveOutputPostProcessor());
         }
 
+        /// <summary>
+        /// Contains all of the post processors currently registered with this manager
+        /// </summary>
         public List<IPostProcessor> PostProcessors { get; } = new List<IPostProcessor>();
 
+        /// <summary>
+        /// Runs all enabled post processors against a <code>DownloadItem</code>, assuming the item has completed
+        /// </summary>
+        /// <param name="item"></param>
         public void Run(DownloadItem item)
         {
             PostProcessors.Where(pp => pp.Enabled || pp.Mandatory).ToList().ForEach(pp => pp.Run(item));

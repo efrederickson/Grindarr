@@ -11,8 +11,8 @@ namespace Grindarr.Core.Downloaders
         public static DownloadManager Instance => _instance ??= new DownloadManager();
 
         public int MaxSimultaneousDownloads { get; set; } = 5;
-        public bool IgnoreStalledDownloads { get; set; } = true;
-        public double StalledDownloadCutoff { get; set; } = 50; // 50 bytes per second
+        public bool? IgnoreStalledDownloads { get; set; } = Config.Instance.IgnoreStalledDownloads;
+        public double? StalledDownloadCutoff { get; set; } = Config.Instance.StalledDownloadCutoff;
         public IEnumerable<DownloadItem> DownloadQueue
         {
             get => downloads.Keys;
@@ -53,7 +53,7 @@ namespace Grindarr.Core.Downloaders
         {
             UpdateActiveDownloads();
             downloads.Remove(e.Target);
-            PostProcessors.PostProcessorManager.Instance.Run(e.Target); // TODO: move this somewhere better
+            PostProcessors.PostProcessorManager.Instance.Run(e.Target); // TODO: move this somewhere better?
             DownloadCompleted?.Invoke(sender, e);
         }
 
@@ -86,11 +86,11 @@ namespace Grindarr.Core.Downloaders
         public IEnumerable<DownloadItem> GetActiveDownloads()
         {
             var res = downloads.Values
-                .Where((val) => val.GetProgress().Status == DownloadStatus.Downloading);
+                .Where((val) => val.CurrentDownloadItem.Progress.Status == DownloadStatus.Downloading);
 
             // Filter stalled downloads if requested
-            if (IgnoreStalledDownloads)
-                res = res.Where((p) => p.GetProgress().SpeedTracker.GetBytesPerSecond() > StalledDownloadCutoff);
+            if (IgnoreStalledDownloads.HasValue && IgnoreStalledDownloads.Value)
+                res = res.Where((p) => p.CurrentDownloadItem.Progress.SpeedTracker.GetBytesPerSecond() > StalledDownloadCutoff);
 
             return res.Select((s) => s.CurrentDownloadItem);
         }
@@ -106,20 +106,7 @@ namespace Grindarr.Core.Downloaders
                 Cancel(val.Key);
         }
 
-        public DownloadItem GetById(Guid id)
-        {
-            var res = downloads.Keys.Where(dl => dl.Id == id);
-            Console.WriteLine($"downloads: {downloads.Count}, matches: {res.Count()}");
-            foreach (var k in downloads.Keys)
-            {
-                Console.WriteLine(k.Id);
-                Console.WriteLine(k.Id.Equals(id));
-            }
-            Console.WriteLine(id);
-
-                
-                return res.FirstOrDefault();
-        }
+        public DownloadItem GetById(Guid id) => downloads.Keys.Where(dl => dl.Id == id).FirstOrDefault();
 
         private IDownloader GetExistingDownload(DownloadItem item)
         {
@@ -135,7 +122,7 @@ namespace Grindarr.Core.Downloaders
 
         public DownloadProgress GetProgress(DownloadItem item)
         {
-            return GetExistingDownload(item).GetProgress();
+            return GetExistingDownload(item).CurrentDownloadItem.Progress;
         }
 
         public void Pause(DownloadItem item)
@@ -146,7 +133,8 @@ namespace Grindarr.Core.Downloaders
         public void PauseAll()
         {
             foreach (var item in downloads)
-                Pause(item.Key);
+                if (item.Key.Progress.Status == DownloadStatus.Pending || item.Key.Progress.Status == DownloadStatus.Downloading)
+                    Pause(item.Key);
         }
 
         public void Resume(DownloadItem item)
@@ -157,7 +145,8 @@ namespace Grindarr.Core.Downloaders
         public void ResumeAll()
         {
             foreach (var item in downloads)
-                Resume(item.Key);
+                if (item.Key.Progress.Status == DownloadStatus.Paused)
+                    Resume(item.Key);
         }
     }
 }
