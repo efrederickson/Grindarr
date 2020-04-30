@@ -13,18 +13,6 @@ namespace Grindarr.Core
         public double UnformattedDownloadSpeed => SpeedTracker.GetBytesPerSecond();
         public string DownloadSpeed => SpeedTracker.GetBytesPerSecondString();
 
-        public DateTime StartDate { get; set; }
         public DownloadStatus Status { get; set; }
-
-        public static DownloadProgress Create(long bytesDownloaded, long bytesTotal, DownloadStatus status)
-        {
-            return new DownloadProgress()
-            {
-                BytesDownloaded = bytesDownloaded,
-                BytesTotal = bytesTotal,
-                Status = status,
-                StartDate = DateTime.Now
-            };
-        }
     }
 }

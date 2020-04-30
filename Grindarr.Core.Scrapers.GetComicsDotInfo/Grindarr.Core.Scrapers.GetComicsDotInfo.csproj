@@ -5,10 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Interactive.Async" Version="4.1.1" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.23" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Grindarr.Core.Scrapers\Grindarr.Core.Scrapers.csproj" />
     <ProjectReference Include="..\Grindarr.Core\Grindarr.Core.csproj" />
   </ItemGroup>
 

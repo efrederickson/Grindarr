@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Grindarr.Core.Scrapers
 {
@@ -9,7 +10,7 @@ namespace Grindarr.Core.Scrapers
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public IEnumerable<ContentItem> Search(string text);
+        public IAsyncEnumerable<ContentItem> SearchAsync(string text);
 
         /// <summary>
         /// Used to preserve constructor arguments, for example if the scraper is generic for a type of website, 

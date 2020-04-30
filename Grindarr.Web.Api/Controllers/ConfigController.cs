@@ -12,15 +12,15 @@ namespace Grindarr.Web.Api.Controllers
     public class ConfigController : ControllerBase
     {
         [HttpGet]
-        public ActionResult<Config.BareConfig> Index()
+        public Config.BareConfig Index()
         {
             var cfg = Config.Instance.GetBareConfig().Clone();
             cfg.CustomSections = null; // TODO
-            return new ActionResult<Config.BareConfig>(cfg);
+            return cfg;
         }
         
         [HttpPut]
-        public ActionResult Put(Config.BareConfig newPartialConfig)
+        public IActionResult Put(Config.BareConfig newPartialConfig)
         {
             Config.Instance.Merge(newPartialConfig);
             return Ok();

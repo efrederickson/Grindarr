@@ -140,7 +140,7 @@
             }).appendTo(entry);
 
             $('<div>', { text: "Name: " + grindarr.scrapers.parseName(scraper.className) }).appendTo(entry);
-            $('<div>', { text: "Arguments: [ " + scraper.arguments.join(", ") + " ]" }).appendTo(entry);
+            $('<div>', { text: "Arguments: [ " + (scraper.arguments ?? []).join(", ") + " ]" }).appendTo(entry);
 
             entry.appendTo(li);
             li.appendTo(scraperHolder);

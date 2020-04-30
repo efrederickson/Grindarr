@@ -3,7 +3,7 @@
 
 <div class="input-group">
     <input type="text" class="form-control" id="searchTextField" />
-    <button class="btn btn-success" id="searchButton">Search</button>
+    <button class="btn btn-success search-button" id="searchButton">Search</button>
 </div>
 
 <table id="searchTable" class="search-table">
@@ -76,10 +76,12 @@
             sizeTd.appendTo(tr);
 
             var dlLinksTd = $('<td>');
+            var dlLinksUl = $('<ul>');
             $.each(entry.downloadLinks, function (k, link) {
                 var linkElement = $('<a>');
                 linkElement.attr("href", "#");
                 linkElement.attr("title", link);
+                linkElement.addClass("word-break-all");
                 linkElement.text(link);
                 linkElement.click(function () {
                     var contentItem = $.extend({}, entry);
@@ -102,8 +104,11 @@
                         }
                     });
                 });
-                linkElement.appendTo(dlLinksTd);
+                var li = $('<li>');
+                linkElement.appendTo(li);
+                li.appendTo(dlLinksUl);
             });
+            dlLinksUl.appendTo(dlLinksTd);
             dlLinksTd.appendTo(tr);
 
             tr.appendTo(searchTable);

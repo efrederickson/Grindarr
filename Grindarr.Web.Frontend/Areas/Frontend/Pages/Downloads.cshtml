@@ -3,7 +3,7 @@
 
 <table id="downloadTable" class="downloadTable">
     <tr>
-        <th onclick="sortTable('downloadTable', 0)">Name</th>
+        <th onclick="sortTable('downloadTable', 0)" id="nameHeaderField">Name</th>
         <th onclick="sortTable('downloadTable', 1)">Size</th>
         <th onclick="sortTable('downloadTable', 2)">Progress</th>
         <th onclick="sortTable('downloadTable', 3)">Speed</th>
@@ -27,14 +27,27 @@
             $('<td>', { id: id + "-percent" }).attr("sort-type", "number").appendTo(newEntry);
             $('<td>', { id: id + "-downloadSpeed" }).attr("sort-type", "number").appendTo(newEntry);
             $('<td>', { id: id + "-downloadStatus" }).appendTo(newEntry);
-            $('<td>', { id: id + "-downloadUrl" }).appendTo(newEntry);
-            var actionTd = $('<td>');
+            $('<td>', { id: id + "-downloadUrl", class: "word-break-all" }).appendTo(newEntry);
+            var actionTd = $('<td>', { class: "display-flex" });
 
             $('<button>', {
                 class: 'btn btn-info',
-                text: 'Pause/Resume'
+                text: 'Pause/Resume',
+                id: id + "-togglePausedButton"
             }).click(function () {
-                alert("⏸︎ / ► " + id);
+                grindarr.getDownload(id, function (data, errData) {
+                    if (data != null) {
+                        if (data.progress.status == grindarr.DownloadStatus.Paused) {
+                            grindarr.resumeDownload(id, function () {
+                                updateDownloads();
+                            });
+                        } else if (data.progress.status == grindarr.DownloadStatus.Downloading || data.progress.status == grindarr.DownloadStatus.Pending) {
+                            grindarr.pauseDownload(id, function () {
+                                updateDownloads();
+                            });
+                        }
+                    }
+                });
             }).appendTo(actionTd);
 
             $('<button>', {
@@ -70,6 +83,7 @@
                 .text(data.progress.downloadSpeed);
             $('#' + id + "-downloadStatus").text(grindarr.textForDownloadStatus(data.progress.status));
             $('#' + id + "-downloadUrl").text(data.downloadUri);
+            $('#' + id + "-togglePausedButton").text(data.progress.status == grindarr.DownloadStatus.Paused ? "►" : "⏸︎");
         }
 
         var getOrCreateDownloadEntry = function (data) {
@@ -80,6 +94,7 @@
         };
 
         var updateDownloads = function () {
+            $('<div>', { class: "loader", id: "loader" }).appendTo($("#nameHeaderField"));
 
             grindarr.getDownloads(function (data, errData) {
 
@@ -113,11 +128,12 @@
                         $('<td>').appendTo(fakeItem);
                     fakeItem.appendTo($('#downloadTable'));
                 }
+                $("#loader").remove();
             })
 
         };
 
-        setInterval(updateDownloads, 5000);
+        setInterval(updateDownloads, 2000);
         updateDownloads();
     })();
 </script>

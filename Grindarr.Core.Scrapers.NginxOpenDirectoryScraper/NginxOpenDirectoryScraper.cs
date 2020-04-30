@@ -20,35 +20,29 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
 
         public IEnumerable<string> GetSerializableConstructorArguments() => new string[] { rootFolderUri.ToString() };
 
-        public IEnumerable<ContentItem> Search(string text)
+        public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
         {
-            var dirContentsTask = Task.Run(async () => await listDirectoryAsync(rootFolderUri));
-            dirContentsTask.Wait();
-            var dirContents = dirContentsTask.Result;
-
-            var filtered = dirContents.Where(ci => ci.Title.Contains(text, StringComparison.OrdinalIgnoreCase));
-
-            while (filtered.Any(ci => ci is FolderContentItem))
-            {
-                var folders = filtered.Where(ci => ci is FolderContentItem);
-                var others = filtered.Where(ci => !(ci is FolderContentItem));
-                List<ContentItem> filteredTemp = new List<ContentItem>(others);
-                foreach (var folder in folders)
-                {
-                    var task = Task.Run(async () => await listDirectoryAsync(folder.DownloadLinks.FirstOrDefault()));
-                    task.Wait();
-                    filteredTemp.AddRange(task.Result);
-                }
-                filtered = filteredTemp.Where(ci => ci.Title.Contains(text, StringComparison.OrdinalIgnoreCase));
-            }
-
-            return filtered;
+            await foreach (var item in RecursivelySearchDirectoriesAsync(rootFolderUri, text))
+                yield return item;
         }
 
-        private async Task<IEnumerable<ContentItem>> listDirectoryAsync(Uri dir)
+        private async IAsyncEnumerable<ContentItem> RecursivelySearchDirectoriesAsync(Uri dir, string query)
         {
-            List<ContentItem> res = new List<ContentItem>();
+            await foreach (var item in ListDirectoryAsync(dir))
+            {
+                if (item.Title.Contains(query, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (item is FolderContentItem)
+                        await foreach (var sub in RecursivelySearchDirectoriesAsync(item.DownloadLinks.First(), query))
+                            yield return sub;
+                    else
+                        yield return item;
+                }
+            }
+        }
 
+        private async IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir)
+        {
             var httpResponse = await httpClient.GetAsync(dir);
             var responseBodyText = httpResponse.Content.ReadAsStringAsync();
             var document = new HtmlDocument();
@@ -92,10 +86,8 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
                 if (ulong.TryParse(sizeText, out ulong sizeParsed))
                     item.ReportedSizeInBytes = sizeParsed;
 
-                res.Add(item);
+                yield return item;
             }
-
-            return res;
         }
     }
 }

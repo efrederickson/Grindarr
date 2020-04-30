@@ -119,6 +119,14 @@ var grindarr = (function () {
             return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_DOWNLOAD_CREATE, data, cb, "POST");
         },
 
+        pauseDownload: function (id, cb) {
+            return grindarr.authenticatedRequest(grindarr.WEB_ROOT + "download/" + id + "/pause", null, cb, "POST");
+        },
+        
+        resumeDownload: function (id, cb) {
+            return grindarr.authenticatedRequest(grindarr.WEB_ROOT + "download/" + id + "/resume", null, cb, "POST");
+        },
+
         // CONFIG
 
         getConfig: function () {

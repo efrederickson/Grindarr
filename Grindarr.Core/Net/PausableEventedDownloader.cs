@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Grindarr.Core.Net
 {
@@ -102,8 +104,7 @@ namespace Grindarr.Core.Net
             {
                 // Initialize fs writer
                 using FileStream fs = new FileStream(Filename, filemode);
-                // Initialize download
-                using HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using HttpWebResponse httpResponse = GetUnredirectedResponse(httpRequest);
 
                 var contentDispositionHeader = httpResponse.Headers.Get("Content-Disposition");
                 if (!string.IsNullOrEmpty(contentDispositionHeader))
@@ -137,6 +138,38 @@ namespace Grindarr.Core.Net
             finally
             {
                 StatusChanged?.Invoke(this, new EventArgs());
+            }
+        }
+
+        private HttpWebResponse GetUnredirectedResponse(WebRequest req)
+        {
+            try
+            {
+                var res = req.GetResponse();
+                return (HttpWebResponse)res;
+            }
+            catch (WebException ex)
+            {
+                // We have to manually deal with redirects here because .NET Core does not 
+                // auto redirect https to http in the name of safety. While this is a noble 
+                // effort, and probably the correct to handle it, unfortunately some sites
+                // do not do this and redirect down to https. So this will hopefully handle 
+                // that. 
+                var httpResp = ((HttpWebResponse)ex.Response);
+                if ((int)httpResp.StatusCode >= 300 && (int)httpResp.StatusCode < 400)
+                {
+                    var redirect = httpResp.GetResponseHeader("Location");
+                    if (!string.IsNullOrEmpty(redirect))
+                    {
+                        Console.WriteLine("Following redirect to: " + redirect);
+                        var newUrl = new Uri(redirect);
+                        var newFn = newUrl.Segments.Last();
+                        ReceivedResponseFilename?.Invoke(this, new ResponseFilenameEventArgs(HttpUtility.UrlDecode(newFn)));
+                        return GetUnredirectedResponse(WebRequest.Create(newUrl));
+                    }
+                }
+                // Rethrow error if it's not a 300-type redirect
+                throw ex;
             }
         }
     }

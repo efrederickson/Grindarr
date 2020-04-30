@@ -22,10 +22,14 @@ namespace Grindarr.Core.Tests
         {
             var res = new DownloadItem(CreateContentItem(), new Uri($"https://site-other.com/alt-dl-{Random.Next()}.iso"));
 
-            res.Progress = DownloadProgress.Create(0, 0, DownloadStatus.Pending);
+            res.Progress = new DownloadProgress
+            {
+                BytesDownloaded = 0,
+                BytesTotal = 0,
+                Status = DownloadStatus.Pending
+            };
             res.Progress.BytesTotal = Random.Next(1, int.MaxValue - 1);
             res.Progress.BytesDownloaded = Random.Next(1, (int)res.Progress.BytesTotal);
-            res.Progress.StartDate = DateTime.Now;
             res.Progress.Status = (DownloadStatus)Random.Next(0, (int)DownloadStatus.Canceled);
             res.Progress.SpeedTracker.SetProgress(0);
             res.Progress.SpeedTracker.SetProgress(Random.Next(1, (int)res.Progress.BytesTotal));

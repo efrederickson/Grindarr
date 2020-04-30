@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -26,7 +27,11 @@ namespace Grindarr.Core.Scrapers
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public IEnumerable<ContentItem> Search(string text) => scrapers.SelectMany(s => s.Search(text)).ToList(); // The call to ToList here forces the promise to resolve
+        public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
+        {
+            await foreach (var result in scrapers.Select(s => s.SearchAsync(text)).Merge())
+                yield return result;
+        }
 
         public void Register(IScraper scraper)
         {
@@ -88,13 +93,14 @@ namespace Grindarr.Core.Scrapers
             var list = new List<Dictionary<string, string[]>>();
             foreach (var scraper in scrapers)
             {
-                var argCount = scraper.GetConstructorArgumentCount();
+                var expectedArgCount = scraper.GetConstructorArgumentCount();
                 var args = scraper.GetSerializableConstructorArguments();
-                if (argCount != args.Count())
+                var argCount = args == null ? 0 : args.Count();
+                if (expectedArgCount != argCount)
                     throw new InvalidOperationException($"Argument counts do not match for {scraper.GetType().FullName}");
                 list.Add(new Dictionary<string, string[]>()
                 {
-                    { scraper.GetType().AssemblyQualifiedName, args.ToArray() }
+                    { scraper.GetType().AssemblyQualifiedName, args == null ? Array.Empty<string>() : args.ToArray() }
                 });
             }
             Config.Instance.SetCustomSection(CONFIG_SECTION, list);

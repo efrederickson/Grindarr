@@ -13,9 +13,10 @@ namespace Grindarr.Web.Api.Controllers
     public class ActionsController
     {
         [HttpPost("search/{query}")]
-        public ActionResult<IEnumerable<ContentItem>> SearchAction(string query)
+        public async IAsyncEnumerable<ContentItem> SearchAction(string query)
         {
-            return new ActionResult<IEnumerable<ContentItem>>(ScraperManager.Instance.Search(query));
+            await foreach (var result in ScraperManager.Instance.SearchAsync(query))
+                yield return result;
         }
     }
 }

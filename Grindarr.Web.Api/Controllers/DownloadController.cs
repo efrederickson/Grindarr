@@ -13,9 +13,10 @@ namespace Grindarr.Web.Api.Controllers
     public class DownloadController : ControllerBase
     {
         [HttpGet]
-        public ActionResult<IEnumerable<DownloadItem>> Index()
+        public IEnumerable<DownloadItem> Index()
         {
-            return new ActionResult<IEnumerable<DownloadItem>>(DownloadManager.Instance.DownloadQueue);
+            foreach (var dl in DownloadManager.Instance.DownloadQueue)
+                yield return dl;
         }
 
         [HttpGet("{guid}")]
@@ -28,7 +29,7 @@ namespace Grindarr.Web.Api.Controllers
         }
 
         [HttpDelete("{guid}")]
-        public ActionResult Delete(Guid guid)
+        public IActionResult Delete(Guid guid)
         {
             var dl = DownloadManager.Instance.GetById(guid);
             if (dl == null)

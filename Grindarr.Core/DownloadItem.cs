@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Web;
 
 namespace Grindarr.Core
 {
@@ -32,8 +33,8 @@ namespace Grindarr.Core
             Content = item;
             DownloadUri = dlUri;
 
-            DownloadingFilename = dlUri.Segments.Last();
-            CompletedFilename = dlUri.Segments.Last();
+            DownloadingFilename = HttpUtility.UrlDecode(dlUri.Segments.Last());
+            CompletedFilename = DownloadingFilename;
 
             Id = Guid.NewGuid();
         }

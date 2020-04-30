@@ -1,12 +1,13 @@
 ﻿using Grindarr.Core.Net;
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace Grindarr.Core.Downloaders.Implementations
 {
     public class GenericDownloader : IDownloader
     {
-        private PausableEventedDownloader downloader;
+        protected PausableEventedDownloader downloader;
 
         public DownloadItem CurrentDownloadItem { get; private set; }
 
@@ -14,19 +15,19 @@ namespace Grindarr.Core.Downloaders.Implementations
         public event EventHandler<DownloadEventArgs> DownloadFailed;
         public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
 
-        public void Cancel()
+        public virtual void Cancel()
         {
             downloader.Stop();
             CurrentDownloadItem.Progress.Status = DownloadStatus.Canceled;
             DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
-        public DownloadProgress GetProgress()
+        public virtual DownloadProgress GetProgress()
         {
             return CurrentDownloadItem.Progress;
         }
 
-        public void Pause()
+        public virtual void Pause()
         {
             if (CurrentDownloadItem.Progress.Status != DownloadStatus.Downloading)
                 throw new InvalidOperationException();
@@ -36,7 +37,7 @@ namespace Grindarr.Core.Downloaders.Implementations
             DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
-        public void Resume()
+        public virtual void Resume()
         {
             if (CurrentDownloadItem.Progress.Status != DownloadStatus.Paused)
                 throw new InvalidOperationException();
@@ -46,23 +47,30 @@ namespace Grindarr.Core.Downloaders.Implementations
             DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
-        public void SetItem(DownloadItem item)
+        public virtual void SetItem(DownloadItem item) => SetItem(item, item.DownloadUri);
+
+        protected virtual void SetItem(DownloadItem item, Uri actualDownloadUri)
         {
             CurrentDownloadItem = item;
-            downloader = new PausableEventedDownloader(item.DownloadUri, item.GetDownloadingPath());
+            downloader = new PausableEventedDownloader(actualDownloadUri, item.GetDownloadingPath());
             downloader.ProgressChanged += Downloader_ProgressChanged;
             downloader.StatusChanged += Downloader_StatusChanged;
             downloader.ReceivedResponseFilename += Downloader_ReceivedResponseFilename;
-            item.Progress = DownloadProgress.Create(0, 0, DownloadStatus.Pending);
+            item.Progress = new DownloadProgress
+            {
+                BytesTotal = 0,
+                BytesDownloaded = 0,
+                Status = DownloadStatus.Pending
+            };
         }
 
-        private void Downloader_ReceivedResponseFilename(object sender, ResponseFilenameEventArgs e)
+        protected void Downloader_ReceivedResponseFilename(object sender, ResponseFilenameEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Filename))
                 CurrentDownloadItem.CompletedFilename = e.Filename;
         }
 
-        private void Downloader_StatusChanged(object sender, EventArgs e)
+        protected void Downloader_StatusChanged(object sender, EventArgs e)
         {
             if (downloader.IsDone())
             {
@@ -76,7 +84,7 @@ namespace Grindarr.Core.Downloaders.Implementations
             }
         }
 
-        private void Downloader_ProgressChanged(object sender, EventArgs e)
+        protected void Downloader_ProgressChanged(object sender, EventArgs e)
         {
             CurrentDownloadItem.Progress.BytesDownloaded = downloader.Progress;
             CurrentDownloadItem.Progress.BytesTotal = downloader.Size;
@@ -85,7 +93,7 @@ namespace Grindarr.Core.Downloaders.Implementations
             DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
-        public void Start()
+        public virtual void Start()
         {
             if (CurrentDownloadItem.Progress.Status != DownloadStatus.Pending)
                 throw new InvalidOperationException();

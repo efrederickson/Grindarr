@@ -6,22 +6,24 @@ using Grindarr.Core;
 using Grindarr.Core.Downloaders;
 using Grindarr.Core.Scrapers;
 using Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper;
+using Grindarr.Core.Scrapers.GetComicsDotInfo;
 using Grindarr.Core.Scrapers.NginxOpenDirectoryScraper;
 
 namespace Grindarr.ConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static async System.Threading.Tasks.Task Main(string[] args)
         {
             Console.WriteLine("start");
             var sm = ScraperManager.Instance;
             //sm.Register(new ApacheOpenDirectoryScraper(new Uri("http://www.modders-heaven.net/2000GB%201/")));
-            sm.Register(new ApacheOpenDirectoryScraper(new Uri("https://dynamics.cs.washington.edu/nobackup/reddit/")));
-            sm.Register(new NginxOpenDirectoryScraper(new Uri("http://167.99.206.36/Movie/2020/")));
-            var res = sm.Search("bloodshot");
+            //sm.Register(new ApacheOpenDirectoryScraper(new Uri("https://dynamics.cs.washington.edu/nobackup/reddit/")));
+            //sm.Register(new NginxOpenDirectoryScraper(new Uri("http://167.99.206.36/Movie/2020/")));
+            if (sm.GetRegisteredScrapers().Select(s => s.GetType() == typeof(GetComicsScraper)).Count() == 0)
+                sm.Register(new GetComicsScraper());
             Console.WriteLine("scraper done");
-            foreach (var obj in res)
+            await foreach (var obj in sm.SearchAsync("bloodseed"))
                 Console.WriteLine("Search result: " + obj.Title + ": " + obj.DatePosted + ", " + obj.ReportedSizeInBytes + ", " + obj.DownloadLinks.FirstOrDefault());
             Console.WriteLine("results done");
 
