@@ -4,14 +4,6 @@
     margin-top: 1em;
 }
 
-.search-table tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
 .create-download-check {
     display: inline;
-}
-
-.search-button {
-    margin-left: 1em;
 }

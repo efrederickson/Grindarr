@@ -12,7 +12,7 @@ namespace Grindarr.Web.Api.Controllers
     [Route("/api/[controller]")]
     public class ActionsController
     {
-        [HttpPost("search/{query}")]
+        [HttpPost("search/{query?}")]
         public async IAsyncEnumerable<ContentItem> SearchAction(string query)
         {
             await foreach (var result in ScraperManager.Instance.SearchAsync(query))

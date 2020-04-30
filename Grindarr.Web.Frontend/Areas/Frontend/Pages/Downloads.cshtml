@@ -1,15 +1,15 @@
 ﻿@page
 @model Grindarr.Web.Frontend.Pages.DownloadsModel
 
-<table id="downloadTable" class="downloadTable">
+<table id="downloadTable" class="download-table sortable">
     <tr>
-        <th onclick="sortTable('downloadTable', 0)" id="nameHeaderField">Name</th>
-        <th onclick="sortTable('downloadTable', 1)">Size</th>
-        <th onclick="sortTable('downloadTable', 2)">Progress</th>
-        <th onclick="sortTable('downloadTable', 3)">Speed</th>
-        <th onclick="sortTable('downloadTable', 4)">State</th>
-        <th onclick="sortTable('downloadTable', 5)">Source URL</th>
-        <th onclick="sortTable('downloadTable', 6)">Actions</th>
+        <th id="nameHeaderField">Name</th>
+        <th class="sorttable_numeric">Size</th>
+        <th class="sorttable_numeric">Progress</th>
+        <th class="sorttable_numeric">Speed</th>
+        <th>State</th>
+        <th>Source URL</th>
+        <th>Actions</th>
     </tr>
 </table>
 
@@ -23,11 +23,11 @@
                 "content-id": id,
             });
             $('<td>', { id: id + "-title" }).appendTo(newEntry);
-            $('<td>', { id: id + "-totalSize" }).attr("sort-type", "number").appendTo(newEntry);
-            $('<td>', { id: id + "-percent" }).attr("sort-type", "number").appendTo(newEntry);
-            $('<td>', { id: id + "-downloadSpeed" }).attr("sort-type", "number").appendTo(newEntry);
+            $('<td>', { id: id + "-totalSize" }).appendTo(newEntry);
+            $('<td>', { id: id + "-percent" }).appendTo(newEntry);
+            $('<td>', { id: id + "-downloadSpeed" }).appendTo(newEntry);
             $('<td>', { id: id + "-downloadStatus" }).appendTo(newEntry);
-            $('<td>', { id: id + "-downloadUrl", class: "word-break-all" }).appendTo(newEntry);
+            $('<td>', { id: id + "-downloadUrl" }).appendTo(newEntry);
             var actionTd = $('<td>', { class: "display-flex" });
 
             $('<button>', {
@@ -73,13 +73,13 @@
 
             $('#' + id + "-title").text(data.content.title);
             $('#' + id + "-totalSize")
-                .attr("sort-value", data.progress.BytesTotal)
+                .attr("sorttable_customkey", data.progress.BytesTotal)
                 .text(grindarr.bytesToHumanReadableString(data.progress.bytesTotal, false));
             $('#' + id + "-percent")
-                .attr("sort-value", data.progress.percentage)
+                .attr("sorttable_customkey", data.progress.percentage)
                 .text((data.progress.percentage * 100).toFixed(2) + '%');
             $('#' + id + "-downloadSpeed")
-                .attr("sort-value", data.progress.unformattedDownloadSpeed)
+                .attr("sorttable_customkey", data.progress.unformattedDownloadSpeed)
                 .text(data.progress.downloadSpeed);
             $('#' + id + "-downloadStatus").text(grindarr.textForDownloadStatus(data.progress.status));
             $('#' + id + "-downloadUrl").text(data.downloadUri);
@@ -128,8 +128,9 @@
                         $('<td>').appendTo(fakeItem);
                     fakeItem.appendTo($('#downloadTable'));
                 }
+                sorttable.makeSortable(document.getElementById("downloadTable"));
                 $("#loader").remove();
-            })
+            });
 
         };
 

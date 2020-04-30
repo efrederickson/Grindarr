@@ -13,45 +13,10 @@
     width: 80%;
     margin-left: auto;
     margin-right: auto;
-    border: 1px solid white;
-}
-
-.config-table tr:nth-child(even) {
-    background-color: #f2f2f2;
 }
 
 .value-td {
     position: relative;
-}
-
-.save-success-check {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.save-success-check-fadein {
-    animation: fadeIn ease .75s;
-}
-
-.save-success-check-fadeout {
-    animation: fadeOut ease .75s;
-}
-
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@keyframes fadeOut {
-    0% {
-        opacity: 1;
-    }
-
-    100% {
-        opacity: 0;
-    }
 }
 
 .basic-list {
@@ -60,14 +25,7 @@
     margin-right: auto;
     border: 1px solid #f2f2f2;
     list-style: none;
-}
-
-.config-pp-section {
-    
-}
-
-.config-pp-title {
-
+    border-radius: .25rem;
 }
 
 .config-pp-desc {
@@ -82,6 +40,6 @@
     padding-right: 0.5em;
 }
 
-.config-scraper-item {
-    border-bottom: 1px solid lightgray;
+.config-scraper-item:not(:last-child) {
+    border-bottom: 1px solid #f2f2f2;
 }

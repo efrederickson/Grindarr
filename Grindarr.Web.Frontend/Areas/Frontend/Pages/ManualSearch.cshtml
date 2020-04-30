@@ -1,18 +1,20 @@
 ﻿@page
 @model Grindarr.Web.Frontend.Areas.Frontend.Pages.ManualSearchModel
 
-<div class="input-group">
+<div class="input-group mb-3">
     <input type="text" class="form-control" id="searchTextField" />
-    <button class="btn btn-success search-button" id="searchButton">Search</button>
+    <div class="input-group-append">
+        <button class="btn btn-success" id="searchButton">Search</button>
+    </div>
 </div>
 
-<table id="searchTable" class="search-table">
+<table id="searchTable" class="search-table sortable">
     <tr>
-        <th onclick="sortTable('searchTable', 0)">Title</th>
-        <th onclick="sortTable('searchTable', 1)">Date Posted</th>
-        <th onclick="sortTable('searchTable', 2)">Source</th>
-        <th onclick="sortTable('searchTable', 3)">Reported Size</th>
-        <th onclick="sortTable('searchTable', 4)">Download Links</th>
+        <th>Title</th>
+        <th>Date Posted</th>
+        <th>Source</th>
+        <th class="sorttable_numeric">Reported Size</th>
+        <th>Download Links</th>
     </tr>
 </table>
 
@@ -45,6 +47,7 @@
                 $('<td>').appendTo(fakeItem);
                 $('<td>').appendTo(fakeItem);
                 $('<td>').appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
 
                 fakeItem.appendTo($("#searchTable"));
             }
@@ -71,8 +74,7 @@
             sourceLinkTd.appendTo(tr);
 
             var sizeTd = $('<td>', { text: grindarr.bytesToHumanReadableString(entry.reportedSizeInBytes, true) });
-            sizeTd.attr("sort-value", entry.reportedSizeInBytes);
-            sizeTd.attr("sort-type", "number");
+            sizeTd.attr("sorttable_customkey", entry.reportedSizeInBytes);
             sizeTd.appendTo(tr);
 
             var dlLinksTd = $('<td>');
@@ -81,7 +83,6 @@
                 var linkElement = $('<a>');
                 linkElement.attr("href", "#");
                 linkElement.attr("title", link);
-                linkElement.addClass("word-break-all");
                 linkElement.text(link);
                 linkElement.click(function () {
                     var contentItem = $.extend({}, entry);
@@ -113,5 +114,6 @@
 
             tr.appendTo(searchTable);
         });
+        sorttable.makeSortable(document.getElementById("searchTable"));
     }
 </script>
