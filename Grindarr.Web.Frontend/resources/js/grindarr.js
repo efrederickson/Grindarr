@@ -1,5 +1,30 @@
 ﻿// This module creates an easy JS api for interacting with the Grindarr REST API
 
+function getCookie(cname) {
+    // https://www.w3schools.com/js/js_cookies.asp
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return null;
+}
+
+function setCookie(cname, cvalue, exdays = 7) {
+    // https://www.w3schools.com/js/js_cookies.asp
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
 var grindarr = (function () {
     return {
         WEB_ROOT: '/api/',
@@ -25,7 +50,7 @@ var grindarr = (function () {
         ENDPOINT_POSTPROCESSOR_GET: 'postprocessor/',
         ENDPOINT_POSTPROCESSOR_UPDATE: 'postprocessor/',
 
-        API_KEY: "no-api-key-set",
+        API_KEY: getCookie("grindarr-api-key") ?? "no-api-key-set",
 
         DownloadStatus: {
             Pending: 0,
@@ -39,6 +64,12 @@ var grindarr = (function () {
         },
 
         authenticatedRequest: function (url, data, callback, method = "GET", synchronous = false) {
+            var getApiKeyHandler = function () {
+                grindarr.API_KEY = prompt("Invalid Grindarr API key, please enter the correct API key", "api-key");
+                setCookie("grindarr-api-key", grindarr.API_KEY);
+                return grindarr.authenticatedRequest(url, data, callback, method, synchronous);
+            };
+
             if (synchronous) {
                 var res = null;
                 $.ajax({
@@ -51,6 +82,9 @@ var grindarr = (function () {
                 }).done(function (data) {
                     res = data;
                 }).fail(function (jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.status == 401) {
+                        return getApiKeyHandler();
+                    }
                     console.log("Request failed: " + textStatus);
                 });
                 return res;
@@ -66,6 +100,9 @@ var grindarr = (function () {
                         callback(data);
                     }
                 }).fail(function (jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.status == 401) {
+                        return getApiKeyHandler();
+                    }
                     console.log("Request failed: " + jqXHR.responseText);
                     if (callback != null) {
                         callback(null, {
@@ -130,53 +167,68 @@ var grindarr = (function () {
         // CONFIG
 
         getConfig: function () {
-            return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_CONFIG_LIST, null, null, "GET", true);
+            return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_CONFIG_LIST, null, null, "GET", true) ?? {};
         },
 
         updateConfigField: function (field, value, cb) {
             return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_CONFIG_UPDATE, {
                 [field]: value // Map value of 'field' to 'value'
-            }, cb, method = "PUT");
+            }, cb, "PUT", false);
         },
 
         // CONFIG FIELDS
 
         config: {
             getInProgressDownloadsFolder: function () {
-                return grindarr.getConfig().inProgressDownloadsFolder;
+                return grindarr.getConfig()["grindarr.core.config.inProgressDownloadsFolder"];
             },
 
             getCompletedDownloadsFolder: function () {
-                return grindarr.getConfig().completedDownloadsFolder;
+                return grindarr.getConfig()["grindarr.core.config.completedDownloadFolder"];
             },
 
             getIgnoreStalledDownloads: function () {
-                return grindarr.getConfig().ignoreStalledDownloads;
+                return grindarr.getConfig()["grindarr.core.config.ignoreStalledDownloads"];
             },
 
             getStalledDownloadCutoff: function () {
-                return grindarr.getConfig().stalledDownloadCutoff;
+                return grindarr.getConfig()["grindarr.core.config.stalledDownloadCutoff"];
+            },
+
+            getApiKey: function () {
+                return grindarr.getConfig()["grindarr.web.api.authorization.apiKey"];
+            },
+
+            getEnforceApiKey: function () {
+                return grindarr.getConfig()["grindarr.web.api.authorization.enforceApiKey"];
             },
 
             setInProgressDownloadsFolder: function (path, cb) {
-                return grindarr.updateConfigField("inProgressDownloadsFolder", path, cb);
+                return grindarr.updateConfigField("grindarr.core.config.inProgressDownloadsFolder", path, cb);
             },
 
             setCompletedDownloadsFolder: function (path, cb) {
-                return grindarr.updateConfigField("completedDownloadsFolder", path, cb);
+                return grindarr.updateConfigField("grindarr.core.config.completedDownloadFolder", path, cb);
             },
 
             setIgnoreStalledDownloads: function (val, cb) {
                 val = !!val; // convert to boolean
-                return grindarr.updateConfigField("ignoreStalledDownloads", val, cb);
+                return grindarr.updateConfigField("grindarr.core.config.ignoreStalledDownloads", val, cb);
             },
 
             setStalledDownloadCutoff: function (cutoff, cb) {
                 if (cutoff < 0) // Sanitize value (yes, i know client-side validation is not the best, this is also done on the server)
                     cutoff = 0;
-                return grindarr.updateConfigField("stalledDownloadCutoff", cutoff, cb);
+                return grindarr.updateConfigField("grindarr.core.config.stalledDownloadCutoff;", cutoff, cb);
             },
 
+            setApiKey: function (val, cb) {
+                return grindarr.updateConfigField("grindarr.web.api.authorization.apiKey", val, cb);
+            },
+
+            setEnforceApiKey: function (val, cb) {
+                return grindarr.updateConfigField("grindarr.web.api.authorization.enforceApiKey", !!val, cb);
+            },
         },
 
         // POST PROCESSOR

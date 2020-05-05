@@ -13,7 +13,6 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
     {
         private static readonly HttpClient httpClient = new HttpClient();
         private const string searchUrlBase = "https://getcomics.info/?s={0}";
-        public uint GetConstructorArgumentCount() => 0;
 
         public IEnumerable<string> GetSerializableConstructorArguments() => default;
 
@@ -69,7 +68,7 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
             {
                 var link = linkNode.GetAttributeValue("href", "<could not scrape link>");
                 var linkUri = new Uri(link);
-                var resolvedUri = await UrlRedirectionResolverUtility.ResolveAsync(linkUri);
+                var resolvedUri = linkUri;
                 contentItem.DownloadLinks.Add(resolvedUri);
             }
             return contentItem;

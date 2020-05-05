@@ -7,6 +7,15 @@
         <th>Value</th>
     </tr>
     <tr>
+        <td>Enforce API Key</td>
+        <td class="value-td"><input type="checkbox" onchange="saveEnforceApiKey()" id="enforceApiKeyInputField" /></td>
+    </tr>
+    <tr>
+        <td>API Key</td>
+        <td class="value-td"><input type="text" class="form-control" onchange="saveApiKey()" id="apiKeyTextField" /></td>
+    </tr>
+    <tr><td></td><td></td></tr>
+    <tr>
         <td>Folder for in-progress downloads</td>
         <td class="value-td"><input type="text" class="form-control" onchange="saveInProgressDownloadsFolderChanges()" id="inProgressDownloadsFolder" /></td>
     </tr>
@@ -42,6 +51,28 @@
                 elem.remove();
             }, 750);
         }, 750);
+    }
+
+    function saveEnforceApiKey() {
+        var value = $("#enforceApiKeyInputField").is(":checked");
+        grindarr.config.setEnforceApiKey(value, function (data, err) {
+            if (err == null) {
+                showSaveSuccess($("#enforceApiKeyInputField"));
+            } else {
+                alert("Failed to save setting: " + err.errorMessage);
+            }
+        });
+    }
+
+    function saveApiKey() {
+        var value = $("#apiKeyTextField").val();
+        grindarr.config.setApiKey(value, function (data, err) {
+            if (err == null) {
+                showSaveSuccess($("#apiKeyTextField"));
+            } else {
+                alert("Failed to save setting: " + err.errorMessage);
+            }
+        });
     }
 
     function saveInProgressDownloadsFolderChanges() {
@@ -174,6 +205,8 @@
     }
 
     (function () {
+        $("#enforceApiKeyInputField").prop('checked', grindarr.config.getEnforceApiKey());
+        $("#apiKeyTextField").val(grindarr.config.getApiKey());
         $("#inProgressDownloadsFolder").val(grindarr.config.getInProgressDownloadsFolder());
         $("#completedDownloadsFolder").val(grindarr.config.getCompletedDownloadsFolder());
         $("#ignoreStalledDownloads").prop('checked', grindarr.config.getIgnoreStalledDownloads());

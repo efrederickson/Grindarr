@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Grindarr.Core;
 using Grindarr.Web.Api.Authorization;
 using Grindarr.Web.Frontend;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +32,10 @@ namespace Grindarr.Web.Application
             services.AddControllers().AddApplicationPart(typeof(Grindarr.Web.Api.Controllers.DownloadController).Assembly);
             services.AddHostedService<ApplicationPartsLogger>();
             services.AddGrindarrFrontend();
+
+            // Here we initialize the Grindarr Config values to ensure the defaults exist
+            Config.Instance.RegisterDefaultCoreConfigurationValues();
+            ApiKeyWrapper.RegisterDefaultConfiguration();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,10 +48,10 @@ namespace Grindarr.Web.Application
             else
             {
                 app.UseExceptionHandler("/Error");
+                app.UseMiddleware(typeof(ErrorHandlingMiddleware));
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 // app.UseHsts();
             }
-            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             
             //app.UseHttpsRedirection();
             app.UseStaticFiles();

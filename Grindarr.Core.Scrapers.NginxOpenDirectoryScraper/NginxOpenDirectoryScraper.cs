@@ -16,8 +16,6 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
         public NginxOpenDirectoryScraper(Uri rootFolderUri) => this.rootFolderUri = rootFolderUri;
         public NginxOpenDirectoryScraper(String rootFolderUriStr) : this(new Uri(rootFolderUriStr)) { }
 
-        public uint GetConstructorArgumentCount() => 1;
-
         public IEnumerable<string> GetSerializableConstructorArguments() => new string[] { rootFolderUri.ToString() };
 
         public async IAsyncEnumerable<ContentItem> SearchAsync(string text)

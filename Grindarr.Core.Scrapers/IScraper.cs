@@ -18,11 +18,5 @@ namespace Grindarr.Core.Scrapers
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetSerializableConstructorArguments();
-
-        /// <summary>
-        /// Returns the number of arguments needed for the constructor, see <see cref="GetSerializableConstructorArguments"/>
-        /// </summary>
-        /// <returns></returns>
-        public uint GetConstructorArgumentCount();
     }
 }

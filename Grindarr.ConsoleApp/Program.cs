@@ -40,20 +40,7 @@ namespace Grindarr.ConsoleApp
             var di = new DownloadItem(ci, ci.DownloadLinks.First());
             di.DownloadingFilename = di.DownloadUri.Segments.Last();
             di.CompletedFilename = di.DownloadingFilename;
-
-            Config.Instance.CompletedDownloadsFolder = "complete";
-            Config.Instance.InProgressDownloadsFolder = "in-progress";
-            if (!Directory.Exists(Config.Instance.CompletedDownloadsFolder))
-                Directory.CreateDirectory(Config.Instance.CompletedDownloadsFolder);
-            if (!Directory.Exists(Config.Instance.InProgressDownloadsFolder))
-                Directory.CreateDirectory(Config.Instance.InProgressDownloadsFolder);
-
-            if (File.Exists(di.GetDownloadingPath()))
-                File.Delete(di.GetDownloadingPath());
-
-            if (File.Exists(di.GetCompletedPath()))
-                File.Delete(di.GetCompletedPath());
-
+            
             DownloadManager.Instance.DownloadAdded += Instance_DownloadAdded;
             DownloadManager.Instance.DownloadCompleted += Instance_DownloadCompleted;
             DownloadManager.Instance.DownloadFailed += Instance_DownloadFailed;

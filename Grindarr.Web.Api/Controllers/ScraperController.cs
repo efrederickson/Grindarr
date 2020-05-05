@@ -16,21 +16,20 @@ namespace Grindarr.Web.Api.Controllers
             return new ScraperCreatorObject
             {
                 ClassName = value.GetType().AssemblyQualifiedName,
-                Arguments = value.GetSerializableConstructorArguments(),
-                ArgumentCount = value.GetConstructorArgumentCount()
+                Arguments = value.GetSerializableConstructorArguments()
             };
         }
 
         [HttpGet("available")]
-        public ActionResult<IEnumerable<string>> GetAvailable()
+        public IEnumerable<string> GetAvailable()
         {
-            return new ActionResult<IEnumerable<string>>(ScraperManager.GetAllScraperClasses().Select(t => t.AssemblyQualifiedName));
+            return ScraperManager.GetAllScraperClasses().Select(t => t.AssemblyQualifiedName);
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ScraperCreatorObject>> Index()
+        public IEnumerable<ScraperCreatorObject> Index()
         {
-            return new ActionResult<IEnumerable<ScraperCreatorObject>>(ScraperManager.Instance.GetRegisteredScrapers().Select(s => ConvertToObject(s)));
+            return ScraperManager.Instance.GetRegisteredScrapers().Select(s => ConvertToObject(s));
         }
 
         [HttpGet("{id}")]
@@ -44,7 +43,7 @@ namespace Grindarr.Web.Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(ScraperCreatorObject arg)
+        public IActionResult Post(ScraperCreatorObject arg)
         {
             var type = Type.GetType(arg.ClassName);
             if (type == null)
@@ -56,7 +55,7 @@ namespace Grindarr.Web.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        public IActionResult Delete(int id)
         {
             var scrapers = ScraperManager.Instance.GetRegisteredScrapers().ToList();
             if (scrapers.Count <= id)

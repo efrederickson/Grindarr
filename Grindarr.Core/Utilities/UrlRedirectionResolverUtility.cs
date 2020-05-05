@@ -17,7 +17,6 @@ namespace Grindarr.Core.Utilities
             // Due to how much this slows down responses (obviously), i've disabled it for now...
             // Additionally GetComics seems to provide a one time use URL, so this breaks that
             // TODO: ... ?
-            return source;
 
             var req = WebRequest.CreateHttp(source);
             req.Method = "HEAD";
@@ -38,16 +37,11 @@ namespace Grindarr.Core.Utilities
                         var redirect = httpResp.GetResponseHeader(key);
                         Console.WriteLine("Following redirect to: " + redirect);
                         var newUrl = new Uri(redirect);
-                        return Resolve(newUrl);
+                        return await ResolveAsync(newUrl);
                     }
                 }
                 return source;
             }
-        }
-
-        public static Uri Resolve(Uri source)
-        {
-            return Task.Run(async () => await ResolveAsync(source)).Result;
         }
     }
 }

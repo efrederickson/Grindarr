@@ -11,12 +11,9 @@ namespace Grindarr.Core.Downloaders
         public static DownloadManager Instance => _instance ??= new DownloadManager();
 
         public int MaxSimultaneousDownloads { get; set; } = 5;
-        public bool? IgnoreStalledDownloads { get; set; } = Config.Instance.IgnoreStalledDownloads;
-        public double? StalledDownloadCutoff { get; set; } = Config.Instance.StalledDownloadCutoff;
-        public IEnumerable<DownloadItem> DownloadQueue
-        {
-            get => downloads.Keys;
-        }
+        public bool? IgnoreStalledDownloads => Config.Instance.GetIgnoreStalledDownloads();
+        public double? StalledDownloadCutoff => Config.Instance.GetStalledDownloadsCutoff();
+        public IEnumerable<DownloadItem> DownloadQueue => downloads.Keys;
 
         private readonly Dictionary<DownloadItem, IDownloader> downloads = new Dictionary<DownloadItem, IDownloader>();
 
@@ -24,8 +21,6 @@ namespace Grindarr.Core.Downloaders
         public event EventHandler<DownloadEventArgs> DownloadFailed;
         public event EventHandler<DownloadEventArgs> DownloadAdded;
         public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
-
-        private DownloadManager() { }
 
         private void UpdateActiveDownloads()
         {

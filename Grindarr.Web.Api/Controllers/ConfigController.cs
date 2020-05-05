@@ -1,8 +1,10 @@
 ﻿using Grindarr.Core;
+using Grindarr.Core.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Grindarr.Web.Api.Controllers
@@ -12,17 +14,20 @@ namespace Grindarr.Web.Api.Controllers
     public class ConfigController : ControllerBase
     {
         [HttpGet]
-        public Config.BareConfig Index()
+        public Dictionary<string, dynamic> Index()
         {
-            var cfg = Config.Instance.GetBareConfig().Clone();
-            cfg.CustomSections = null; // TODO
+            var cfg = Config.Instance.GetRawDictionary();
             return cfg;
         }
         
         [HttpPut]
-        public IActionResult Put(Config.BareConfig newPartialConfig)
+        public IActionResult Put(Dictionary<string, JsonElement> newPartialConfig)
         {
-            Config.Instance.Merge(newPartialConfig);
+            // Map json elements to underlying type
+            var newPartialConfig2 = newPartialConfig.ToDictionary(entry => entry.Key, entry => JsonElementUnwrapper.Unwrap(entry.Value));
+            // Update config
+            Config.Instance.Merge(newPartialConfig2);
+            // Return success
             return Ok();
         }
     }

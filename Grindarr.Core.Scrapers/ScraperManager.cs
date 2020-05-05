@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -10,7 +11,7 @@ namespace Grindarr.Core.Scrapers
 {
     public class ScraperManager
     {
-        private const string CONFIG_SECTION = "scrapers";
+        private const string CONFIG_SECTION = "grindarr.core.scrapers.configuredScrapers";
 
         private static ScraperManager _instance = null;
         public static ScraperManager Instance => _instance ??= new ScraperManager();
@@ -70,50 +71,33 @@ namespace Grindarr.Core.Scrapers
 
         private void LoadScrapers()
         {
-            //var scraperSection = Config.Instance.GetCustomSection<List<Dictionary<string, string[]>>>(CONFIG_SECTION);
-            var scraperSection = Config.Instance.GetCustomSection<Newtonsoft.Json.Linq.JArray>(CONFIG_SECTION);
-            if (scraperSection == null)
-                return;
-            foreach (var scraper in scraperSection)
+            foreach (var scraper in Config.Instance.GetEnumerableValue<ScraperModel>(CONFIG_SECTION))
             {
-                Dictionary<string, string[]> scraperCreator = ((Newtonsoft.Json.Linq.JObject)scraper).ToObject<Dictionary<string, string[]>>();
-                foreach (var key in scraperCreator.Keys)
-                {
-                    var targetType = Type.GetType(key);
-                    if (targetType == null)
-                        throw new InvalidOperationException($"Type name {key} does not exist");
-                    var instance = CreateScraperWithoutRegistering(targetType, scraperCreator[key]);
-                    scrapers.Add(instance);
-                }
+                var targetType = Type.GetType(scraper.ClassName);
+                if (targetType == null)
+                    throw new InvalidOperationException($"Type name {scraper.ClassName} does not exist");
+                var instance = CreateScraperWithoutRegistering(targetType, scraper.Arguments);
+                scrapers.Add(instance);
             }
         }
 
         private void SaveScrapers()
         {
-            var list = new List<Dictionary<string, string[]>>();
+            var list = new List<ScraperModel>();
             foreach (var scraper in scrapers)
             {
-                var expectedArgCount = scraper.GetConstructorArgumentCount();
-                var args = scraper.GetSerializableConstructorArguments();
-                var argCount = args == null ? 0 : args.Count();
-                if (expectedArgCount != argCount)
-                    throw new InvalidOperationException($"Argument counts do not match for {scraper.GetType().FullName}");
-                list.Add(new Dictionary<string, string[]>()
+                list.Add(new ScraperModel()
                 {
-                    { scraper.GetType().AssemblyQualifiedName, args == null ? Array.Empty<string>() : args.ToArray() }
+                    ClassName = scraper.GetType().AssemblyQualifiedName,
+                    Arguments = scraper.GetSerializableConstructorArguments() ?? Array.Empty<string>()
                 });
             }
-            Config.Instance.SetCustomSection(CONFIG_SECTION, list);
+            Config.Instance.SetValue(CONFIG_SECTION, list);
         }
 
-        public static IEnumerable<Type> GetAllScraperClasses()
-        {
-            List<Type> ret = new List<Type>();
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-                foreach (var type in asm.GetTypes())
-                    if (type.GetInterfaces().Contains(typeof(IScraper)))
-                        ret.Add(type);
-            return ret;
-        }
+        public static IEnumerable<Type> GetAllScraperClasses() 
+            => AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(asm => asm.GetTypes())
+            .Where(t => t.GetInterfaces().Contains(typeof(IScraper)));
     }
 }

@@ -8,62 +8,38 @@ namespace Grindarr.Web.Api.Authorization
 {
     public static class ApiKeyWrapper
     {
-        private const string CONFIG_SECTION = "webBackendApiKey";
-        private const string CONFIG_APIKEY_FIELD = "apiKey";
-        private const string CONFIG_ENFORCE_APIKEY_FIELD = "enforceApiKey";
-
-        private static Dictionary<string, dynamic> GetConfigurationSettings()
-        {
-            var section = Config.Instance.GetCustomSection<Dictionary<string, dynamic>>(CONFIG_SECTION);
-            if (section == null)
-            {
-                // Generate defaults
-                section = new Dictionary<string, dynamic>
-                {
-                    [CONFIG_ENFORCE_APIKEY_FIELD] = false
-                };
-
-            }
-            return section;
-        }
-        
-        private static void UpdateConfigurationSetting(string field, dynamic value)
-        {
-            var section = Config.Instance.GetCustomSection<Dictionary<string, dynamic>>(CONFIG_SECTION);
-            section[field] = value;
-            Config.Instance.SetCustomSection(CONFIG_SECTION, section);
-        }
+        private const string CONFIGPATH_APIKEY = "grindarr.web.api.authorization.apiKey";
+        private const string CONFIGPATH_ENFORCE_APIKEY = "grindarr.web.api.authorization.enforceApiKey";
 
         public static string ApiKey
         {
             get
             {
-                return GetConfigurationSettings()[CONFIG_APIKEY_FIELD] ?? GenerateApiKey();
+                return Config.Instance.GetValue<string>(CONFIGPATH_APIKEY, null) ?? GenerateApiKey();
             }
-            set
-            {
-                UpdateConfigurationSetting(CONFIG_APIKEY_FIELD, value);
-            }
+            set => Config.Instance.SetValue(CONFIGPATH_APIKEY, value);
         }
 
         public static bool EnforceApiKey
         {
-            get => GetConfigurationSettings()[CONFIG_ENFORCE_APIKEY_FIELD];
-            set => UpdateConfigurationSetting(CONFIG_ENFORCE_APIKEY_FIELD, value);
+            get => Config.Instance.GetValue(CONFIGPATH_ENFORCE_APIKEY, false);
+            set => Config.Instance.SetValue(CONFIGPATH_ENFORCE_APIKEY, value);
         }
 
-        public static string GenerateApiKey()
-        {
-            var newKey = Guid.NewGuid().ToString().Replace("-", "");
-            Config.Instance.SetCustomSection(CONFIG_SECTION, newKey);
-            return newKey;
-        }
+        private static string GenerateApiKey() => Config.Instance.SetValue(CONFIGPATH_APIKEY, Guid.NewGuid().ToString().Replace("-", ""));
 
         public static bool ValidateApiKey(string apiKey)
         {
             if (!EnforceApiKey)
                 return true; // If not enforcing, any key is "valid"
             return ApiKey == apiKey;
+        }
+
+        public static void RegisterDefaultConfiguration()
+        {
+            // Ensure the defaults are generated or loaded
+            _ = EnforceApiKey;
+            _ = ApiKey;
         }
     }
 }

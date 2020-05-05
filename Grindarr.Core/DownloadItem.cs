@@ -56,7 +56,7 @@ namespace Grindarr.Core
         /// <returns></returns>
         public string GetDownloadingPath()
         {
-            return Path.Join(Config.Instance.InProgressDownloadsFolder, DownloadingFilename);
+            return Path.Join(Config.Instance.GetInProgressDownloadsFolder(), DownloadingFilename);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Grindarr.Core
         /// <returns></returns>
         public string GetCompletedPath()
         {
-            return Path.Join(Config.Instance.CompletedDownloadsFolder, CompletedFilename);
+            return Path.Join(Config.Instance.GetCompleteDownloadsFolder(), CompletedFilename);
         }
     }
 }

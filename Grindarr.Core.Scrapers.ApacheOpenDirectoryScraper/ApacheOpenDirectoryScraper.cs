@@ -17,8 +17,6 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
         public ApacheOpenDirectoryScraper(Uri rootFolderUri) => this.rootFolderUri = rootFolderUri;
         public ApacheOpenDirectoryScraper(String rootFolderUriStr) : this(new Uri(rootFolderUriStr)) { }
 
-        public uint GetConstructorArgumentCount() => 1;
-
         public IEnumerable<string> GetSerializableConstructorArguments() => new string[] { rootFolderUri.ToString() };
 
         public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
