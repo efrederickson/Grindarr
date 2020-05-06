@@ -34,7 +34,10 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
                 var uri = item.Links.FirstOrDefault()?.Uri;
                 if (uri == null)
                     continue;
-                yield return await ParsePageContentsAsync(uri);
+                var ci = ContentItemStore.GetBySourceUrl(uri);
+                if (ci == null)
+                    ci = await ParsePageContentsAsync(uri);
+                yield return ci;
             }
         }
 
@@ -57,12 +60,14 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
 
         private async Task<ContentItem> ParsePageContentsAsync(Uri url)
         {
-            var contentItem = new ContentItem();
+            // The timeout here is 3 hours, why? Based on my monitoring of the website,
+            // it doesn't update too often - the individual pages even less often - therefore a 3 hour timeout
+            // Should be a good balance. Also reduces hammering the poor, useful website. 
+            var contentItem = ContentItemStore.GetOrCreateBySourceUrl(url, timeout: TimeSpan.FromHours(3));
 
             var httpResponse = await httpClient.GetAsync(url);
-            var responseBodyText = httpResponse.Content.ReadAsStringAsync();
             var document = new HtmlDocument();
-            document.LoadHtml(await responseBodyText);
+            document.LoadHtml(await httpResponse.Content.ReadAsStringAsync());
 
             contentItem.Title = HttpUtility.HtmlDecode(document.DocumentNode.Descendants().Where(node => node.HasClass("post-title")).FirstOrDefault().InnerText);
             contentItem.DatePosted = DateTime.Parse(document.DocumentNode.Descendants()

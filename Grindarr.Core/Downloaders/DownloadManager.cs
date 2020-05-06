@@ -104,13 +104,13 @@ namespace Grindarr.Core.Downloaders
 
         public void Pause(DownloadItem item) => GetExistingDownload(item).Pause();
 
-        public void PauseAll() 
+        public void PauseAll()
             => DownloadQueue.Where(item => item.Progress.Status == DownloadStatus.Pending || item.Progress.Status == DownloadStatus.Downloading)
             .ToList().ForEach(item => Pause(item));
 
         public void Resume(DownloadItem item) => GetExistingDownload(item).Resume();
 
-        public void ResumeAll() 
+        public void ResumeAll()
             => DownloadQueue.Where(item => item.Progress.Status == DownloadStatus.Paused).ToList().ForEach(item => Resume(item));
     }
 }

@@ -78,7 +78,7 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
                 ContentItem item =
                     relativeLink.EndsWith("/")
                     ? new FolderContentItem()
-                    : new ContentItem();
+                    : ContentItemStore.GetOrCreateByDownloadUrl(completeUri);
 
                 item.Source = dir;
                 item.Title = title;

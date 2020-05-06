@@ -24,6 +24,7 @@ namespace Grindarr.Web.Api.Controllers
         /// <param name="format"></param>
         /// <returns></returns>
         [HttpGet] // Index action
+        [ResponseCache(Duration = 60)] // 60 second cache duration to avoid duplicated requests
         public async Task<IActionResult> GetLatestItemsRssFeed(int count = 100, string format = "rss")
         {
             var feed = ScraperManager.Instance.CreateSyndicationFeedFromLatestItemsAsync(count);

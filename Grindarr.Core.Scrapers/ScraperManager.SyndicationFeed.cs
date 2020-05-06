@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.ServiceModel.Syndication;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace Grindarr.Core.Scrapers
                 {
                     PublishDate = contentItem.DatePosted ?? DateTime.Now
                 };
-                contentItem.DownloadLinks.ForEach(link => feedItem.ElementExtensions.Add("downloadLink", "", link));
+                contentItem.DownloadLinks.ToList().ForEach(link => feedItem.ElementExtensions.Add("downloadLink", "", link));
                 items.Add(feedItem);
             }
 

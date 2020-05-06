@@ -89,7 +89,7 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
                     ContentItem item =
                         relativeLink.EndsWith("/")
                         ? new FolderContentItem()
-                        : new ContentItem();
+                        : ContentItemStore.GetOrCreateByDownloadUrl(completeUri);
 
                     item.Source = dir;
                     item.Title = title;
