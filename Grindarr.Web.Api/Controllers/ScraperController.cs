@@ -11,39 +11,24 @@ namespace Grindarr.Web.Api.Controllers
     [ApiController]
     public class ScraperController : ControllerBase
     {
-        private static ScraperCreatorObject ConvertToObject(IScraper value)
-        {
-            return new ScraperCreatorObject
-            {
-                ClassName = value.GetType().AssemblyQualifiedName,
-                Arguments = value.GetSerializableConstructorArguments()
-            };
-        }
-
         [HttpGet("available")]
-        public IEnumerable<string> GetAvailable()
-        {
-            return ScraperManager.GetAllScraperClasses().Select(t => t.AssemblyQualifiedName);
-        }
+        public IEnumerable<string> GetAvailable() => ScraperManager.GetAllScraperClasses().Select(t => t.AssemblyQualifiedName);
 
         [HttpGet]
-        public IEnumerable<ScraperCreatorObject> Index()
-        {
-            return ScraperManager.Instance.GetRegisteredScrapers().Select(s => ConvertToObject(s));
-        }
+        public IEnumerable<ScraperModel> Index() => ScraperManager.Instance.GetRegisteredScrapers().Select(s => ScraperModel.CreateFromScraper(s));
 
         [HttpGet("{id}")]
-        public ActionResult<ScraperCreatorObject> Get(int id)
+        public ActionResult<ScraperModel> Get(int id)
         {
             var scrapers = ScraperManager.Instance.GetRegisteredScrapers().ToList();
             if (scrapers.Count <= id)
                 return BadRequest("Invalid scraper index");
             var target = scrapers[id];
-            return ConvertToObject(target);
+            return ScraperModel.CreateFromScraper(target);
         }
 
         [HttpPost]
-        public IActionResult Post(ScraperCreatorObject arg)
+        public IActionResult Post(ScraperModel arg)
         {
             var type = Type.GetType(arg.ClassName);
             if (type == null)

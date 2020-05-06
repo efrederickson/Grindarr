@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using System.Web;
+using System.Xml;
 
 namespace Grindarr.Core.Scrapers.GetComicsDotInfo
 {
@@ -13,6 +15,7 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
     {
         private static readonly HttpClient httpClient = new HttpClient();
         private const string searchUrlBase = "https://getcomics.info/?s={0}";
+        private const string feedUrlBase = "https://getcomics.info/feed/";
 
         public IEnumerable<string> GetSerializableConstructorArguments() => default;
 
@@ -20,6 +23,19 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
         {
             await foreach (var result in DoSearchAsync(text))
                 yield return result;
+        }
+
+        public async IAsyncEnumerable<ContentItem> GetLatestItemsAsync(int count)
+        {
+            var feed = SyndicationFeed.Load(XmlReader.Create(feedUrlBase));
+            var items = feed.Items.OrderByDescending(i => i.PublishDate).Take(count);
+            foreach (var item in items)
+            {
+                var uri = item.Links.FirstOrDefault()?.Uri;
+                if (uri == null)
+                    continue;
+                yield return await ParsePageContentsAsync(uri);
+            }
         }
 
         private async IAsyncEnumerable<ContentItem> DoSearchAsync(string query)

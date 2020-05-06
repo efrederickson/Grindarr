@@ -36,6 +36,10 @@ namespace Grindarr.Web.Application
             // Here we initialize the Grindarr Config values to ensure the defaults exist
             Config.Instance.RegisterDefaultCoreConfigurationValues();
             ApiKeyWrapper.RegisterDefaultConfiguration();
+
+            new Core.Scrapers.ApacheOpenDirectoryScraper.ApacheOpenDirectoryScraper(new Uri("http://dummy.com"));
+            new Core.Scrapers.GetComicsDotInfo.GetComicsScraper();
+            new Core.Scrapers.NginxOpenDirectoryScraper.NginxOpenDirectoryScraper("http://dummy.com");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

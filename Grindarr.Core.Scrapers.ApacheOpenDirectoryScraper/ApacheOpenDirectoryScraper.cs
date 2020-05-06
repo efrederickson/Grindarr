@@ -25,6 +25,13 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
                 yield return item;
         }
 
+        public async IAsyncEnumerable<ContentItem> GetLatestItemsAsync(int count)
+        {
+            var results = ListDirectoryAsync(rootFolderUri).OrderByDescending(ci => ci.DatePosted).Take(count);
+            await foreach (var item in results)
+                yield return item;
+        }
+
         private async IAsyncEnumerable<ContentItem> RecursivelySearchDirectoriesAsync(Uri dir, string query)
         {
             await foreach (var item in ListDirectoryAsync(dir))

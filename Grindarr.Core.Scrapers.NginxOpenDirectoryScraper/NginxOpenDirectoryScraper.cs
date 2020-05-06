@@ -24,6 +24,13 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
                 yield return item;
         }
 
+        public async IAsyncEnumerable<ContentItem> GetLatestItemsAsync(int count)
+        {
+            var results = ListDirectoryAsync(rootFolderUri).OrderByDescending(ci => ci.DatePosted).Take(count);
+            await foreach (var item in results)
+                yield return item;
+        }
+
         private async IAsyncEnumerable<ContentItem> RecursivelySearchDirectoriesAsync(Uri dir, string query)
         {
             await foreach (var item in ListDirectoryAsync(dir))
@@ -42,9 +49,8 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
         private async IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir)
         {
             var httpResponse = await httpClient.GetAsync(dir);
-            var responseBodyText = httpResponse.Content.ReadAsStringAsync();
             var document = new HtmlDocument();
-            document.LoadHtml(await responseBodyText);
+            document.LoadHtml(await httpResponse.Content.ReadAsStringAsync());
             bool first = true;
 
             var linkNodes = document.DocumentNode.Descendants("a");

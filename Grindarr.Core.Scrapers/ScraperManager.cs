@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Grindarr.Core.Scrapers
 {
-    public class ScraperManager
+    public partial class ScraperManager
     {
         private const string CONFIG_SECTION = "grindarr.core.scrapers.configuredScrapers";
 
@@ -18,10 +18,7 @@ namespace Grindarr.Core.Scrapers
 
         private readonly List<IScraper> scrapers = new List<IScraper>();
 
-        private ScraperManager() 
-        {
-            LoadScrapers();
-        }
+        private ScraperManager() => LoadScrapers();
 
         /// <summary>
         /// Searches all the registered scraper instances for the text
@@ -31,6 +28,13 @@ namespace Grindarr.Core.Scrapers
         public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
         {
             await foreach (var result in scrapers.Select(s => s.SearchAsync(text)).Merge())
+                yield return result;
+        }
+
+        public async IAsyncEnumerable<ContentItem> GetLatestItems(int count)
+        {
+            var results = scrapers.Select(s => s.GetLatestItemsAsync(count)).Merge().OrderByDescending(ci => ci.DatePosted).Take(count);
+            await foreach (var result in results)
                 yield return result;
         }
 
@@ -81,23 +85,14 @@ namespace Grindarr.Core.Scrapers
             }
         }
 
-        private void SaveScrapers()
-        {
-            var list = new List<ScraperModel>();
-            foreach (var scraper in scrapers)
-            {
-                list.Add(new ScraperModel()
-                {
-                    ClassName = scraper.GetType().AssemblyQualifiedName,
-                    Arguments = scraper.GetSerializableConstructorArguments() ?? Array.Empty<string>()
-                });
-            }
-            Config.Instance.SetValue(CONFIG_SECTION, list);
-        }
+        private void SaveScrapers() 
+            => Config.Instance.SetValue(CONFIG_SECTION, 
+                scrapers.Select(s => ScraperModel.CreateFromScraper(s)).ToList());
 
         public static IEnumerable<Type> GetAllScraperClasses() 
             => AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(asm => asm.GetTypes())
-            .Where(t => t.GetInterfaces().Contains(typeof(IScraper)));
+            .Where(t => t.GetInterfaces().Contains(typeof(IScraper)))
+            .Where(t => !t.IsAbstract);
     }
 }

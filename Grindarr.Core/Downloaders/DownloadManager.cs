@@ -32,9 +32,9 @@ namespace Grindarr.Core.Downloaders
             }
             else if (GetActiveDownloads().Count() > MaxSimultaneousDownloads)
             {
-                var target = DownloadQueue.Where((di) => di.Progress.Status == DownloadStatus.Downloading).FirstOrDefault();
+                var target = DownloadQueue.Where((di) => di.Progress.Status == DownloadStatus.Downloading).Reverse().FirstOrDefault();
                 if (target != null)
-                    GetExistingDownload(target).Pause();
+                    Pause(target);
             }
         }
 
@@ -90,58 +90,27 @@ namespace Grindarr.Core.Downloaders
             return res.Select((s) => s.CurrentDownloadItem);
         }
 
-        public void Cancel(DownloadItem item)
-        {
-            downloads[item].Cancel();
-        }
+        public void Cancel(DownloadItem item) => downloads[item].Cancel();
 
-        public void CancelAll()
-        {
-            foreach (var val in downloads)
-                Cancel(val.Key);
-        }
+        public void CancelAll() => DownloadQueue.ToList().ForEach(item => Cancel(item));
 
         public DownloadItem GetById(Guid id) => downloads.Keys.Where(dl => dl.Id == id).FirstOrDefault();
 
-        private IDownloader GetExistingDownload(DownloadItem item)
-        {
-            if (downloads.ContainsKey(item))
-                return downloads[item];
-            throw new KeyNotFoundException();
-        }
+        private IDownloader GetExistingDownload(DownloadItem item) => DownloadQueue.Contains(item) ? downloads[item] : throw new KeyNotFoundException();
 
-        public void Enqueue(DownloadItem item)
-        {
-            InternalAddDownload(item);
-        }
+        public void Enqueue(DownloadItem item) => InternalAddDownload(item);
 
-        public DownloadProgress GetProgress(DownloadItem item)
-        {
-            return GetExistingDownload(item).CurrentDownloadItem.Progress;
-        }
+        public DownloadProgress GetProgress(DownloadItem item) => GetExistingDownload(item).CurrentDownloadItem.Progress;
 
-        public void Pause(DownloadItem item)
-        {
-            GetExistingDownload(item).Pause();
-        }
+        public void Pause(DownloadItem item) => GetExistingDownload(item).Pause();
 
-        public void PauseAll()
-        {
-            foreach (var item in downloads)
-                if (item.Key.Progress.Status == DownloadStatus.Pending || item.Key.Progress.Status == DownloadStatus.Downloading)
-                    Pause(item.Key);
-        }
+        public void PauseAll() 
+            => DownloadQueue.Where(item => item.Progress.Status == DownloadStatus.Pending || item.Progress.Status == DownloadStatus.Downloading)
+            .ToList().ForEach(item => Pause(item));
 
-        public void Resume(DownloadItem item)
-        {
-            GetExistingDownload(item).Resume();
-        }
+        public void Resume(DownloadItem item) => GetExistingDownload(item).Resume();
 
-        public void ResumeAll()
-        {
-            foreach (var item in downloads)
-                if (item.Key.Progress.Status == DownloadStatus.Paused)
-                    Resume(item.Key);
-        }
+        public void ResumeAll() 
+            => DownloadQueue.Where(item => item.Progress.Status == DownloadStatus.Paused).ToList().ForEach(item => Resume(item));
     }
 }
