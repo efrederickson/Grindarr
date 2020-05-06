@@ -34,7 +34,7 @@ Core:
 - [X] Pausable/Resumable downloads
 - [ ] Pause download without closing web client (causing single-use URLs to fail)
 - [ ] Resume download without wiping incomplete file
-- [ ] Provide RSS for monitoring new/changed entries without manually re-searching specific terms
+- [X] Provide RSS for monitoring new/changed entries without manually re-searching specific terms
 - [ ] Handle failed scrapers without causing the entire search to fail (e.g. an open directory goes down)
 
 ## Project Design
