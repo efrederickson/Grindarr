@@ -26,7 +26,7 @@ namespace Grindarr.Core.PostProcessors
         /// <param name="item"></param>
         public void Run(DownloadItem item)
         {
-            PostProcessors.Where(pp => pp.Enabled || pp.Mandatory).ToList().ForEach(pp => pp.Run(item));
+            PostProcessors.Where(pp => pp.Enabled || pp.Mandatory).OrderBy(pp => pp.Priority).ToList().ForEach(pp => pp.Run(item));
         }
 
         /// <summary>
