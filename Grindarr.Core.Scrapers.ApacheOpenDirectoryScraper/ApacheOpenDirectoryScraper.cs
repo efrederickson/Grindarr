@@ -6,52 +6,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Grindarr.Core.Scrapers.Implementations;
 
 namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
 {
-    public class ApacheOpenDirectoryScraper : IScraper
+    public class ApacheOpenDirectoryScraper : BaseOpenDirectoryScraper
     {
-        private static readonly HttpClient httpClient = new HttpClient();
-        private readonly Uri rootFolderUri;
+        public ApacheOpenDirectoryScraper(Uri rootFolderUri) : base(rootFolderUri) { }
+        public ApacheOpenDirectoryScraper(string rootFolderUriStr) : base(rootFolderUriStr) { }
 
-        public ApacheOpenDirectoryScraper(Uri rootFolderUri) => this.rootFolderUri = rootFolderUri;
-        public ApacheOpenDirectoryScraper(String rootFolderUriStr) : this(new Uri(rootFolderUriStr)) { }
-
-        public IEnumerable<string> GetSerializableConstructorArguments() => new string[] { rootFolderUri.ToString() };
-
-        public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
-        {
-            await foreach (var item in RecursivelySearchDirectoriesAsync(rootFolderUri, text))
-                yield return item;
-        }
-
-        public async IAsyncEnumerable<ContentItem> GetLatestItemsAsync(int count)
-        {
-            var results = ListDirectoryAsync(rootFolderUri).OrderByDescending(ci => ci.DatePosted).Take(count);
-            await foreach (var item in results)
-                yield return item;
-        }
-
-        private async IAsyncEnumerable<ContentItem> RecursivelySearchDirectoriesAsync(Uri dir, string query)
-        {
-            await foreach (var item in ListDirectoryAsync(dir))
-            {
-                if (item.Title.Contains(query, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (item is FolderContentItem)
-                    {
-                        await foreach (var sub in RecursivelySearchDirectoriesAsync(item.DownloadLinks.First(), query))
-                            yield return sub;
-                    }
-                    else
-                    {
-                        yield return item;
-                    }
-                }
-            }
-        }
-        
-        private async IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir)
+        protected override async IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir)
         {
             var httpResponse = await httpClient.GetAsync(dir);
             var responseBodyText = httpResponse.Content.ReadAsStringAsync();
