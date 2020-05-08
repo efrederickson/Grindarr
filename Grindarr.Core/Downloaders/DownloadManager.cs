@@ -62,6 +62,12 @@ namespace Grindarr.Core.Downloaders
 
         private void InternalAddDownload(DownloadItem item)
         {
+            // Check dirs
+            if (!Directory.Exists(Config.Instance.GetInProgressDownloadsFolder()))
+                Directory.CreateDirectory(Config.Instance.GetInProgressDownloadsFolder());
+            if (!Directory.Exists(Config.Instance.GetCompleteDownloadsFolder()))
+                Directory.CreateDirectory(Config.Instance.GetCompleteDownloadsFolder());
+
             // Create and store downloader
             IDownloader dl = DownloaderFactory.CreateFrom(item.DownloadUri);
             dl.SetItem(item);

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using System.Web;
@@ -14,6 +15,7 @@ namespace Grindarr.Core.Net
 
         private bool doDownload = true;
         private bool failed = false;
+        private HttpWebResponse lastResponse = null;
 
         public long Size { get; private set; }
         public long Progress { get; private set; }
@@ -32,20 +34,11 @@ namespace Grindarr.Core.Net
             this.Filename = file;
         }
 
-        public bool IsPaused()
-        {
-            return !doDownload;
-        }
+        public bool IsPaused() => !doDownload;
 
-        public bool IsDone()
-        {
-            return Progress == Size;
-        }
+        public bool IsDone() => Progress == Size;
 
-        public bool HasFailed()
-        {
-            return failed;
-        }
+        public bool HasFailed() => failed;
 
         public async void StartDownloadAsync()
         {
@@ -56,10 +49,7 @@ namespace Grindarr.Core.Net
             StatusChanged?.Invoke(this, new EventArgs());
         }
 
-        public void Stop()
-        {
-            Pause();
-        }
+        public void Stop() => Pause();
 
         public void Pause()
         {
@@ -76,47 +66,29 @@ namespace Grindarr.Core.Net
 
         private async void DownloadWorkerAsync()
         {
-            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(Uri);
-
-            FileMode filemode;
-            // For download resume
-            // TODO: this does not work
-            if (Progress == 0)
-            {
-                filemode = FileMode.CreateNew;
-            }
-            else
-            {
-                filemode = FileMode.Append;
-                httpRequest.AddRange(Progress);
-            }
-
-            if (File.Exists(Filename) && Progress == 0)
-            {
-                //filemode = FileMode.Append;
-                //var size = new FileInfo(Filename).Length;
-                //httpRequest.AddRange(size);
-                //Progress = size;
-                File.Delete(Filename);
-            }
-
             try
             {
-                // Initialize fs writer
-                using FileStream fs = new FileStream(Filename, filemode);
-                using HttpWebResponse httpResponse = GetUnredirectedResponse(httpRequest);
-
-                var contentDispositionHeader = httpResponse.Headers.Get("Content-Disposition");
-                if (!string.IsNullOrEmpty(contentDispositionHeader))
-                {
-                    ContentDisposition contentDisposition = new ContentDisposition(contentDispositionHeader);
-                    ResponseFilename = contentDisposition.FileName;
-                    ReceivedResponseFilename?.Invoke(this, new ResponseFilenameEventArgs(ResponseFilename));
-                }
+                // Initialize reader/writer
+                using var fs = GetOrUpdateFileStream();
+                var httpResponse = GetOrCreateWebStream();
 
                 // Gets the stream associated with the response.
                 Stream receiveStream = httpResponse.GetResponseStream();
-                Size = httpResponse.ContentLength;
+
+                // Better handle resulting file size than blindly using content-length when
+                // a range could result in content-length being a portion of the size.
+                // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Range
+                var contentRangeHeader = httpResponse.GetResponseHeader("Content-Range");
+                if (string.IsNullOrEmpty(contentRangeHeader))
+                {
+                    Size = httpResponse.ContentLength;
+                }
+                else
+                {
+                    var sizeHeaderStr = contentRangeHeader.Split("/").LastOrDefault();
+                    if (long.TryParse(sizeHeaderStr, out long parsedSize))
+                        Size = parsedSize;
+                }
 
                 byte[] read = new byte[CHUNK_SIZE];
 
@@ -124,7 +96,10 @@ namespace Grindarr.Core.Net
                 {
                     var count = await receiveStream.ReadAsync(read, 0, CHUNK_SIZE);
                     if (count == 0) // End of stream, etc
+                    {
+                        lastResponse = null;
                         break;
+                    }
                     await fs.WriteAsync(read, 0, count);
                     Progress += count;
                     ProgressChanged?.Invoke(this, new EventArgs());
@@ -139,6 +114,27 @@ namespace Grindarr.Core.Net
             {
                 StatusChanged?.Invoke(this, new EventArgs());
             }
+        }
+
+        private HttpWebResponse GetOrCreateWebStream()
+        {
+            if (lastResponse != null)
+                return lastResponse;
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(Uri);
+            if (Progress > 0)
+                httpRequest.AddRange(Progress);
+
+            lastResponse = GetUnredirectedResponse(httpRequest);
+
+            var contentDispositionHeader = lastResponse.Headers.Get("Content-Disposition");
+            if (!string.IsNullOrEmpty(contentDispositionHeader))
+            {
+                ContentDisposition contentDisposition = new ContentDisposition(contentDispositionHeader);
+                ResponseFilename = contentDisposition.FileName;
+                ReceivedResponseFilename?.Invoke(this, new ResponseFilenameEventArgs(ResponseFilename));
+            }
+
+            return lastResponse;
         }
 
         private HttpWebResponse GetUnredirectedResponse(WebRequest req)
@@ -165,12 +161,36 @@ namespace Grindarr.Core.Net
                         var newUrl = new Uri(redirect);
                         var newFn = newUrl.Segments.Last();
                         ReceivedResponseFilename?.Invoke(this, new ResponseFilenameEventArgs(HttpUtility.UrlDecode(newFn)));
-                        return GetUnredirectedResponse(WebRequest.Create(newUrl));
+
+                        HttpWebRequest newRequest = (HttpWebRequest)WebRequest.Create(newUrl);
+                        if (Progress > 0)
+                            newRequest.AddRange(Progress);
+                        return GetUnredirectedResponse(newRequest);
                     }
                 }
                 // Rethrow error if it's not a 300-type redirect
                 throw ex;
             }
+        }
+
+        private Stream GetOrUpdateFileStream()
+        {
+            FileMode filemode;
+            // For download resume
+            // TODO: this does not work
+            if (Progress == 0)
+                filemode = FileMode.CreateNew;
+            else
+                filemode = FileMode.Append;
+
+            if (File.Exists(Filename))
+            {
+                filemode = FileMode.Append;
+                var size = new FileInfo(Filename).Length;
+                Progress = size;
+                //File.Delete(Filename);
+            }
+            return new FileStream(Filename, filemode);
         }
     }
 }
