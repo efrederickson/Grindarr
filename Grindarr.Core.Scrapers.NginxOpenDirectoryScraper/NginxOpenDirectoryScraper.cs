@@ -18,37 +18,22 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
             var httpResponse = await httpClient.GetAsync(dir);
             var document = new HtmlDocument();
             document.LoadHtml(await httpResponse.Content.ReadAsStringAsync());
-            bool first = true;
 
             var linkNodes = document.DocumentNode.Descendants("a");
-            foreach (var linkNode in linkNodes)
+            foreach (var linkNode in linkNodes.Skip(1)) // Skip header
             {
-                // Skip header
-                if (first)
-                {
-                    first = false;
-                    continue;
-                }
                 var relativeLink = linkNode.Attributes["href"].Value;
-                var completeUri = dir.ToString().EndsWith("/") || relativeLink.StartsWith("/")
-                    ? new Uri(dir + relativeLink)
-                    : new Uri(dir + "/" + relativeLink);
-                var dateAndSizeText = linkNode.NextSibling.InnerText.Trim();
-                var split = dateAndSizeText.Split(" ");
+                var completeUri = new Uri(dir, relativeLink);
+                var split = linkNode.NextSibling.InnerText.Trim().Split(" ");
                 var dateText = string.Join(" ", split.Take(split.Length - 1));
                 var sizeText = split.Last();
 
-                var title = linkNode.InnerText.EndsWith(">") || linkNode.InnerText.EndsWith("&gt;") // Not url-decoded
-                    ? relativeLink
-                    : linkNode.InnerText;
-
-                ContentItem item =
-                    relativeLink.EndsWith("/")
+                ContentItem item = relativeLink.EndsWith("/")
                     ? new FolderContentItem()
                     : ContentItemStore.GetOrCreateByDownloadUrl(completeUri);
 
                 item.Source = dir;
-                item.Title = title;
+                item.Title = relativeLink;
                 item.DownloadLinks.Add(completeUri);
 
                 if (DateTime.TryParse(dateText, out DateTime dateTimeParsed))

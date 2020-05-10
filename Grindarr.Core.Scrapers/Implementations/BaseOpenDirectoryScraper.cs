@@ -56,6 +56,11 @@ namespace Grindarr.Core.Scrapers.Implementations
             }
         }
 
+        /// <summary>
+        /// This method does the actual loading and enumerating of the open directory (or a subfolder)
+        /// </summary>
+        /// <param name="dir"></param>
+        /// <returns></returns>
         protected abstract IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir);
     }
 }

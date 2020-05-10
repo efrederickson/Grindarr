@@ -22,45 +22,29 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
             var document = new HtmlDocument();
             document.LoadHtml(await responseBodyText);
 
-            bool first = true;
-
             var tables = document.DocumentNode.Descendants("table");
             foreach (var table in tables)
             {
-                foreach (var tableRow in table.Descendants("tr"))
+                foreach (var tableRow in table.Descendants("tr").Skip(1)) // Skip header
                 {
-                    // If it's the header
-                    if (first)
-                    {
-                        first = false;
-                        continue;
-                    }
-
                     var linkNode = tableRow.ChildNodes.Descendants("a").FirstOrDefault();
-                    if (linkNode == null)
+                    if (linkNode == null) 
                         continue;
                     var relativeLink = linkNode.Attributes["href"].Value;
-                    var completeUri = dir.ToString().EndsWith("/") || relativeLink.StartsWith("/")
-                        ? new Uri(dir + relativeLink)
-                        : new Uri(dir + "/" + relativeLink);
+                    var completeUri = new Uri(dir, relativeLink);
                     var dateNode = linkNode.ParentNode.NextSibling;
-                    var sizeNode = dateNode.NextSibling;
+                    var sizeNode = dateNode?.NextSibling;
 
-                    var title = linkNode.InnerText.EndsWith(">") || linkNode.InnerText.EndsWith("&gt;") // Not url-decoded
-                        ? relativeLink
-                        : linkNode.InnerText;
-
-                    ContentItem item =
-                        relativeLink.EndsWith("/")
+                    ContentItem item = relativeLink.EndsWith("/")
                         ? new FolderContentItem()
                         : ContentItemStore.GetOrCreateByDownloadUrl(completeUri);
 
                     item.Source = dir;
-                    item.Title = title;
+                    item.Title = relativeLink;
                     item.DownloadLinks.Add(completeUri);
-                    item.ReportedSizeInBytes = FileSizeUtilities.ParseFromSuffixedString(sizeNode.InnerText);
+                    item.ReportedSizeInBytes = FileSizeUtilities.ParseFromSuffixedString(sizeNode?.InnerText);
 
-                    if (DateTime.TryParse(dateNode.InnerText, out DateTime dateTimeParsed))
+                    if (DateTime.TryParse(dateNode?.InnerText, out DateTime dateTimeParsed))
                         item.DatePosted = dateTimeParsed;
 
                     yield return item;
