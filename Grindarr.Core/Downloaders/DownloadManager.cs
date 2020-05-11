@@ -7,6 +7,8 @@ namespace Grindarr.Core.Downloaders
 {
     public class DownloadManager : IDownloadManager
     {
+        private const string DLSTATE_PATH = "downloads.json";
+
         private static DownloadManager _instance = null;
         public static DownloadManager Instance => _instance ??= new DownloadManager();
 
@@ -21,6 +23,8 @@ namespace Grindarr.Core.Downloaders
         public event EventHandler<DownloadEventArgs> DownloadFailed;
         public event EventHandler<DownloadEventArgs> DownloadAdded;
         public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
+
+        public DownloadManager() => LoadDownloads();
 
         private void UpdateActiveDownloads()
         {
@@ -50,6 +54,7 @@ namespace Grindarr.Core.Downloaders
             downloads.Remove(e.Target);
             PostProcessors.PostProcessorManager.Instance.Run(e.Target); // TODO: move this somewhere better?
             DownloadCompleted?.Invoke(sender, e);
+            SaveDownloads();
         }
 
         private void IDownloader_DownloadFailed(object sender, DownloadEventArgs e)
@@ -58,6 +63,7 @@ namespace Grindarr.Core.Downloaders
             downloads.Remove(e.Target);
             File.Delete(e.Target.GetDownloadingPath());
             DownloadFailed?.Invoke(sender, e);
+            SaveDownloads();
         }
 
         private void InternalAddDownload(DownloadItem item)
@@ -82,6 +88,7 @@ namespace Grindarr.Core.Downloaders
             DownloadAdded?.Invoke(this, new DownloadEventArgs(item));
 
             UpdateActiveDownloads();
+            SaveDownloads();
         }
 
         public IEnumerable<DownloadItem> GetActiveDownloads()
@@ -118,5 +125,17 @@ namespace Grindarr.Core.Downloaders
 
         public void ResumeAll()
             => DownloadQueue.Where(item => item.Progress.Status == DownloadStatus.Paused).ToList().ForEach(item => Resume(item));
+
+        private void LoadDownloads()
+        {
+            if (File.Exists(DLSTATE_PATH))
+            {
+                var loaded = Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<DownloadItem>>(File.ReadAllText(DLSTATE_PATH));
+                foreach (var dl in loaded)
+                    Enqueue(dl);
+            }
+        }
+
+        private void SaveDownloads() => File.WriteAllText(DLSTATE_PATH, Newtonsoft.Json.JsonConvert.SerializeObject(downloads.Keys));
     }
 }

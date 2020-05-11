@@ -11,18 +11,18 @@ namespace Grindarr.Core
         /// <summary>
         /// The <code>ContentItem</code> that this object was created for
         /// </summary>
-        public ContentItem Content { get; protected set; }
+        public ContentItem Content { get; set; }
 
         /// <summary>
         /// The selected download uri for this download item - it may not be one in the <code>Content</code>, due to it being transformed by downloaders
         /// or the like into a "more correct" Uri
         /// </summary>
-        public Uri DownloadUri { get; }
+        public Uri DownloadUri { get; set; }
 
         /// <summary>
         /// Unique ID to identify this download
         /// </summary>
-        public Guid Id { get; }
+        public Guid Id { get; set; }
 
         /// <summary>
         /// Filename (without path) to store the in-progress download
@@ -48,6 +48,11 @@ namespace Grindarr.Core
             CompletedFilename = DownloadingFilename;
 
             Id = Guid.NewGuid();
+        }
+
+        public DownloadItem()
+        {
+
         }
 
         /// <summary>
