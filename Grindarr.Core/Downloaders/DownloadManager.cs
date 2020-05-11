@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Grindarr.Core.Downloaders
 {
@@ -129,13 +130,9 @@ namespace Grindarr.Core.Downloaders
         private void LoadDownloads()
         {
             if (File.Exists(DLSTATE_PATH))
-            {
-                var loaded = Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<DownloadItem>>(File.ReadAllText(DLSTATE_PATH));
-                foreach (var dl in loaded)
-                    Enqueue(dl);
-            }
+                JsonConvert.DeserializeObject<List<DownloadItem>>(File.ReadAllText(DLSTATE_PATH)).ForEach(dl => Enqueue(dl));
         }
 
-        private void SaveDownloads() => File.WriteAllText(DLSTATE_PATH, Newtonsoft.Json.JsonConvert.SerializeObject(downloads.Keys));
+        private void SaveDownloads() => File.WriteAllText(DLSTATE_PATH, JsonConvert.SerializeObject(downloads.Keys));
     }
 }
