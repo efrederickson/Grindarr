@@ -36,7 +36,7 @@ namespace Grindarr.Core.Net
 
         public bool IsPaused() => !doDownload;
 
-        public bool IsDone() => Progress == Size;
+        public bool IsDone() => Progress == Size && Size > 0;
 
         public bool HasFailed() => failed;
 

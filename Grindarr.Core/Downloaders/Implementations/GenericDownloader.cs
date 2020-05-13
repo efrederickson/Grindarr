@@ -1,7 +1,9 @@
 ﻿using Grindarr.Core.Net;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Web;
 
 namespace Grindarr.Core.Downloaders.Implementations
 {
@@ -29,7 +31,7 @@ namespace Grindarr.Core.Downloaders.Implementations
 
         public virtual void Pause()
         {
-            if (CurrentDownloadItem.Progress.Status != DownloadStatus.Downloading)
+            if (CurrentDownloadItem.Progress.Status != DownloadStatus.Downloading && CurrentDownloadItem.Progress.Status != DownloadStatus.Pending)
                 throw new InvalidOperationException();
 
             downloader.Pause();
@@ -52,6 +54,9 @@ namespace Grindarr.Core.Downloaders.Implementations
         protected virtual void SetItem(DownloadItem item, Uri actualDownloadUri)
         {
             CurrentDownloadItem = item;
+            item.DownloadingFilename = HttpUtility.UrlDecode(actualDownloadUri.Segments.Last());
+            item.CompletedFilename = item.DownloadingFilename;
+
             downloader = new PausableEventedDownloader(actualDownloadUri, item.GetDownloadingPath());
             downloader.ProgressChanged += Downloader_ProgressChanged;
             downloader.StatusChanged += Downloader_StatusChanged;
@@ -62,12 +67,15 @@ namespace Grindarr.Core.Downloaders.Implementations
                 BytesDownloaded = 0,
                 Status = DownloadStatus.Pending
             };
+
+            // Now it's ready, invoke the handler to get download manager to start (or update)
+            DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         protected void Downloader_ReceivedResponseFilename(object sender, ResponseFilenameEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Filename))
-                CurrentDownloadItem.CompletedFilename = e.Filename;
+                CurrentDownloadItem.CompletedFilename = HttpUtility.UrlDecode(e.Filename);
         }
 
         protected void Downloader_StatusChanged(object sender, EventArgs e)

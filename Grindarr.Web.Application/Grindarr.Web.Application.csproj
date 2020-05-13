@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Grindarr.Core.Downloaders.Zippyshare\Grindarr.Core.Downloaders.Zippyshare.csproj" />
     <ProjectReference Include="..\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper.csproj" />
     <ProjectReference Include="..\Grindarr.Core.Scrapers.GetComicsDotInfo\Grindarr.Core.Scrapers.GetComicsDotInfo.csproj" />
     <ProjectReference Include="..\Grindarr.Core.Scrapers.NginxOpenDirectoryScraper\Grindarr.Core.Scrapers.NginxOpenDirectoryScraper.csproj" />

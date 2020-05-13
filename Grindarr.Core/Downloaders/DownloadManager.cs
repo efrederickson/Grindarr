@@ -31,13 +31,13 @@ namespace Grindarr.Core.Downloaders
         {
             if (GetActiveDownloads().Count() < MaxSimultaneousDownloads)
             {
-                var target = DownloadQueue.Where((di) => di.Progress.Status == DownloadStatus.Pending).FirstOrDefault();
+                var target = DownloadQueue.Where((di) => di.Progress?.Status == DownloadStatus.Pending).FirstOrDefault();
                 if (target != null)
                     GetExistingDownload(target).Start();
             }
             else if (GetActiveDownloads().Count() > MaxSimultaneousDownloads)
             {
-                var target = DownloadQueue.Where((di) => di.Progress.Status == DownloadStatus.Downloading).Reverse().FirstOrDefault();
+                var target = DownloadQueue.Where((di) => di.Progress?.Status == DownloadStatus.Downloading).Reverse().FirstOrDefault();
                 if (target != null)
                     Pause(target);
             }
@@ -78,13 +78,13 @@ namespace Grindarr.Core.Downloaders
             // Create and store downloader
             IDownloader dl = DownloaderFactory.CreateFrom(item.DownloadUri);
             dl.SetItem(item);
-            downloads[item] = dl;
 
             // Register events
             dl.DownloadProgressChanged += IDownloader_DownloadProgressChanged;
             dl.DownloadComplete += IDownloader_DownloadCompleted;
             dl.DownloadFailed += IDownloader_DownloadFailed;
 
+            downloads[item] = dl;
             // Fire event
             DownloadAdded?.Invoke(this, new DownloadEventArgs(item));
 
@@ -95,7 +95,7 @@ namespace Grindarr.Core.Downloaders
         public IEnumerable<DownloadItem> GetActiveDownloads()
         {
             var res = downloads.Values
-                .Where((val) => val.CurrentDownloadItem.Progress.Status == DownloadStatus.Downloading);
+                .Where((val) => val.CurrentDownloadItem?.Progress?.Status == DownloadStatus.Downloading);
 
             // Filter stalled downloads if requested
             if (IgnoreStalledDownloads.HasValue && IgnoreStalledDownloads.Value)
@@ -119,13 +119,13 @@ namespace Grindarr.Core.Downloaders
         public void Pause(DownloadItem item) => GetExistingDownload(item).Pause();
 
         public void PauseAll()
-            => DownloadQueue.Where(item => item.Progress.Status == DownloadStatus.Pending || item.Progress.Status == DownloadStatus.Downloading)
+            => DownloadQueue.Where(item => item.Progress?.Status == DownloadStatus.Pending || item.Progress?.Status == DownloadStatus.Downloading)
             .ToList().ForEach(item => Pause(item));
 
         public void Resume(DownloadItem item) => GetExistingDownload(item).Resume();
 
         public void ResumeAll()
-            => DownloadQueue.Where(item => item.Progress.Status == DownloadStatus.Paused).ToList().ForEach(item => Resume(item));
+            => DownloadQueue.Where(item => item.Progress?.Status == DownloadStatus.Paused).ToList().ForEach(item => Resume(item));
 
         private void LoadDownloads()
         {
