@@ -17,16 +17,23 @@ namespace Grindarr.Core.Collections
         {
             string domain = url.DnsSafeHost;
 
-            if (typeMap.ContainsKey(domain)) // TODO: better way to do this
-                return (T)Activator.CreateInstance(typeMap[domain]);
+            var filtered = GetFilteredDomains(domain);
+            if (filtered.Count() > 0)
+                return (T)Activator.CreateInstance(filtered.First());
 
             return (T)Activator.CreateInstance(typeof(TDefault));
         }
 
         public static Uri GetBestMatch(IEnumerable<Uri> urls)
         {
-            var matches = urls.Where(url => typeMap.Keys.Contains(url.DnsSafeHost));
+            var matches = urls.Where(url => GetFilteredDomains(url.DnsSafeHost).Count() > 0);
             return matches.FirstOrDefault() ?? urls.FirstOrDefault();
+        }
+
+        private static IEnumerable<Type> GetFilteredDomains(string domain)
+        {
+            foreach (var match in typeMap.Keys.Where(key => domain.EndsWith(key, StringComparison.OrdinalIgnoreCase)))
+                yield return typeMap[match];
         }
 
         public static void Register(string domain, T type)
