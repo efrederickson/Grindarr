@@ -12,7 +12,6 @@
     <tr>
         <th>Title</th>
         <th>Date Posted</th>
-        <th>Source</th>
         <th class="sorttable_numeric">Reported Size</th>
         <th>Download Links</th>
     </tr>
@@ -62,16 +61,16 @@
         $.each(data, function (idx, entry) {
             var tr = $('<tr>');
 
-            $('<td>', { text: entry.title }).appendTo(tr);
-            $('<td>', { text: entry.datePosted }).appendTo(tr);
             var sourceLink = $('<a>');
             sourceLink.attr("href", entry.source);
-            sourceLink.attr("title", entry.source);
+            sourceLink.attr("title", entry.title);
             sourceLink.attr("target", "_blank");
-            sourceLink.text(entry.source);
+            sourceLink.text(entry.title);
             var sourceLinkTd = $('<td>');
             sourceLink.appendTo(sourceLinkTd);
             sourceLinkTd.appendTo(tr);
+
+            $('<td>', { text: entry.datePosted }).appendTo(tr);
 
             var sizeTd = $('<td>', { text: grindarr.bytesToHumanReadableString(entry.reportedSizeInBytes, true) });
             sizeTd.attr("sorttable_customkey", entry.reportedSizeInBytes);

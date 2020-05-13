@@ -8,7 +8,6 @@
         <th class="sorttable_numeric">Progress</th>
         <th class="sorttable_numeric">Speed</th>
         <th>State</th>
-        <th>Source URL</th>
         <th>Actions</th>
     </tr>
 </table>
@@ -27,7 +26,6 @@
             $('<td>', { id: id + "-percent" }).appendTo(newEntry);
             $('<td>', { id: id + "-downloadSpeed" }).appendTo(newEntry);
             $('<td>', { id: id + "-downloadStatus" }).appendTo(newEntry);
-            $('<td>', { id: id + "-downloadUrl" }).appendTo(newEntry);
             var actionTd = $('<td>', { class: "display-flex" });
 
             $('<button>', {
@@ -71,7 +69,13 @@
         var updateDownloadEntry = function (entry, data) {
             var id = entry.attr("content-id");
 
-            $('#' + id + "-title").text(data.content.title);
+            var link = $("<a>");
+            link.attr("href", data.downloadUri);
+            link.attr("title", data.content.title);
+            link.text(data.content.title);
+            $('#' + id + "-title").empty();
+            link.appendTo($('#' + id + "-title"));
+
             $('#' + id + "-totalSize")
                 .attr("sorttable_customkey", data.progress.BytesTotal)
                 .text(grindarr.bytesToHumanReadableString(data.progress.bytesTotal, false));
@@ -82,7 +86,6 @@
                 .attr("sorttable_customkey", data.progress.unformattedDownloadSpeed)
                 .text(data.progress.downloadSpeed);
             $('#' + id + "-downloadStatus").text(grindarr.textForDownloadStatus(data.progress.status));
-            $('#' + id + "-downloadUrl").text(data.downloadUri);
             $('#' + id + "-togglePausedButton").text(data.progress.status == grindarr.DownloadStatus.Paused ? "►" : "⏸︎");
         }
 
@@ -94,6 +97,9 @@
         };
 
         var updateDownloads = function () {
+            if ($("#loader").length != 0) {
+                return;
+            }
             $('<div>', { class: "loader", id: "loader" }).appendTo($("#nameHeaderField"));
 
             grindarr.getDownloads(function (data, errData) {
