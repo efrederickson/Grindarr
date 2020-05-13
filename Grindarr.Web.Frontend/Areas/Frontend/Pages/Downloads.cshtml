@@ -76,17 +76,19 @@
             $('#' + id + "-title").empty();
             link.appendTo($('#' + id + "-title"));
 
-            $('#' + id + "-totalSize")
-                .attr("sorttable_customkey", data.progress.BytesTotal)
-                .text(grindarr.bytesToHumanReadableString(data.progress.bytesTotal, false));
-            $('#' + id + "-percent")
-                .attr("sorttable_customkey", data.progress.percentage)
-                .text((data.progress.percentage * 100).toFixed(2) + '%');
-            $('#' + id + "-downloadSpeed")
-                .attr("sorttable_customkey", data.progress.unformattedDownloadSpeed)
-                .text(data.progress.downloadSpeed);
-            $('#' + id + "-downloadStatus").text(grindarr.textForDownloadStatus(data.progress.status));
-            $('#' + id + "-togglePausedButton").text(data.progress.status == grindarr.DownloadStatus.Paused ? "►" : "⏸︎");
+            if (data.progress != null) {
+                $('#' + id + "-totalSize")
+                    .attr("sorttable_customkey", data.progress.BytesTotal)
+                    .text(grindarr.bytesToHumanReadableString(data.progress.bytesTotal, false));
+                $('#' + id + "-percent")
+                    .attr("sorttable_customkey", data.progress.percentage)
+                    .text((data.progress.percentage * 100).toFixed(2) + '%');
+                $('#' + id + "-downloadSpeed")
+                    .attr("sorttable_customkey", data.progress.unformattedDownloadSpeed)
+                    .text(data.progress.downloadSpeed);
+                $('#' + id + "-downloadStatus").text(grindarr.textForDownloadStatus(data.progress.status));
+                $('#' + id + "-togglePausedButton").text(data.progress.status == grindarr.DownloadStatus.Paused ? "►" : "⏸︎");
+            }
         }
 
         var getOrCreateDownloadEntry = function (data) {

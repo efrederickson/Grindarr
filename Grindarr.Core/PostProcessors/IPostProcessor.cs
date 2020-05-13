@@ -21,7 +21,7 @@
         /// Run the post processor on the specified completed item
         /// </summary>
         /// <param name="item">The completed download item</param>
-        public void Run(DownloadItem item);
+        public void Run(IDownloadItem item);
 
         /// <summary>
         /// Title of the post processor (for UI)

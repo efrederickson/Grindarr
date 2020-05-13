@@ -13,19 +13,19 @@ namespace Grindarr.Web.Api.Controllers
     public class DownloadController : ControllerBase
     {
         [HttpGet]
-        public IEnumerable<DownloadItem> Index()
+        public IEnumerable<IDownloadItem> Index()
         {
             foreach (var dl in DownloadManager.Instance.DownloadQueue)
                 yield return dl;
         }
 
         [HttpGet("{guid}")]
-        public ActionResult<DownloadItem> Get(Guid guid)
+        public IActionResult Get(Guid guid)
         {
             var dl = DownloadManager.Instance.GetById(guid);
             if (dl == null)
                 return BadRequest($"Download was not found with specified guid {guid}");
-            return dl;
+            return new ObjectResult(dl);
         }
 
         [HttpDelete("{guid}")]
@@ -39,7 +39,7 @@ namespace Grindarr.Web.Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult<DownloadItem> Post(ContentItem item)
+        public ActionResult<IDownloadItem> Post(ContentItem item)
         {
             var dl = new DownloadItem(item, DownloaderFactory.GetBestMatch(item.DownloadLinks));
             DownloadManager.Instance.Enqueue(dl);
@@ -48,7 +48,7 @@ namespace Grindarr.Web.Api.Controllers
         }
 
         [HttpPatch("{guid}")]
-        public IActionResult JsonPatchWithModelState(Guid guid, [FromBody] JsonPatchDocument<DownloadItem> patchDoc)
+        public IActionResult JsonPatchWithModelState(Guid guid, [FromBody] JsonPatchDocument<IDownloadItem> patchDoc)
         {
             var dl = DownloadManager.Instance.GetById(guid);
             if (dl == null)

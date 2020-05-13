@@ -24,7 +24,7 @@ namespace Grindarr.Core.PostProcessors
         /// Runs all enabled post processors against a <code>DownloadItem</code>, assuming the item has completed
         /// </summary>
         /// <param name="item"></param>
-        public void Run(DownloadItem item)
+        public void Run(IDownloadItem item)
         {
             foreach (var pp in PostProcessors.Where(pp => pp.Enabled || pp.Mandatory).OrderBy(pp => pp.Priority))
                 pp.Run(item);

@@ -13,7 +13,7 @@ namespace Grindarr.Core.Downloaders.Zippyshare
     {
         private static readonly HttpClient httpClient = new HttpClient();
 
-        public async override void SetItem(DownloadItem item) => base.SetItem(item, await GetActualDownloadUri(item.DownloadUri));
+        public async override void SetItem(IDownloadItem item) => base.SetItem(item, await GetActualDownloadUri(item.DownloadUri));
 
         private async Task<Uri> GetActualDownloadUri(Uri zippysharePage)
         {

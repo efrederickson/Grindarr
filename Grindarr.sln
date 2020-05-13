@@ -25,13 +25,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Web.Api.Authorizat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Web.Frontend", "Grindarr.Web.Frontend\Grindarr.Web.Frontend.csproj", "{BD78FFEF-190B-4778-A780-4ED7FCC5FCFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grindarr.Core.Tests", "Grindarr.Core.Tests\Grindarr.Core.Tests.csproj", "{C8FA4086-A779-48FD-A271-0A9B9319FFD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Core.Tests", "Grindarr.Core.Tests\Grindarr.Core.Tests.csproj", "{C8FA4086-A779-48FD-A271-0A9B9319FFD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grindarr.Core.Scrapers.GetComicsDotInfo", "Grindarr.Core.Scrapers.GetComicsDotInfo\Grindarr.Core.Scrapers.GetComicsDotInfo.csproj", "{A1A327A3-3633-4019-A1C6-796D42DF027F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Core.Scrapers.GetComicsDotInfo", "Grindarr.Core.Scrapers.GetComicsDotInfo\Grindarr.Core.Scrapers.GetComicsDotInfo.csproj", "{A1A327A3-3633-4019-A1C6-796D42DF027F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Downloaders", "Downloaders", "{DA14ED8F-91F0-499C-9BB8-4439847B91C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grindarr.Core.Downloaders.Zippyshare", "Grindarr.Core.Downloaders.Zippyshare\Grindarr.Core.Downloaders.Zippyshare.csproj", "{E675F908-DD76-495E-879E-58474C821AA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Core.Downloaders.Zippyshare", "Grindarr.Core.Downloaders.Zippyshare\Grindarr.Core.Downloaders.Zippyshare.csproj", "{E675F908-DD76-495E-879E-58474C821AA9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

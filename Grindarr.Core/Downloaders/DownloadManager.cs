@@ -16,9 +16,9 @@ namespace Grindarr.Core.Downloaders
         public int MaxSimultaneousDownloads { get; set; } = 5;
         public bool? IgnoreStalledDownloads => Config.Instance.GetIgnoreStalledDownloads();
         public double? StalledDownloadCutoff => Config.Instance.GetStalledDownloadsCutoff();
-        public IEnumerable<DownloadItem> DownloadQueue => downloads.Keys;
+        public IEnumerable<IDownloadItem> DownloadQueue => downloads.Keys;
 
-        private readonly Dictionary<DownloadItem, IDownloader> downloads = new Dictionary<DownloadItem, IDownloader>();
+        private readonly Dictionary<IDownloadItem, IDownloader> downloads = new Dictionary<IDownloadItem, IDownloader>();
 
         public event EventHandler<DownloadEventArgs> DownloadCompleted;
         public event EventHandler<DownloadEventArgs> DownloadFailed;
@@ -67,7 +67,7 @@ namespace Grindarr.Core.Downloaders
             SaveDownloads();
         }
 
-        private void InternalAddDownload(DownloadItem item)
+        private void InternalAddDownload(IDownloadItem item)
         {
             // Check dirs
             if (!Directory.Exists(Config.Instance.GetInProgressDownloadsFolder()))
@@ -92,7 +92,7 @@ namespace Grindarr.Core.Downloaders
             SaveDownloads();
         }
 
-        public IEnumerable<DownloadItem> GetActiveDownloads()
+        public IEnumerable<IDownloadItem> GetActiveDownloads()
         {
             var res = downloads.Values
                 .Where((val) => val.CurrentDownloadItem?.Progress?.Status == DownloadStatus.Downloading);
@@ -104,25 +104,25 @@ namespace Grindarr.Core.Downloaders
             return res.Select((s) => s.CurrentDownloadItem);
         }
 
-        public void Cancel(DownloadItem item) => downloads[item].Cancel();
+        public void Cancel(IDownloadItem item) => downloads[item].Cancel();
 
         public void CancelAll() => DownloadQueue.ToList().ForEach(item => Cancel(item));
 
-        public DownloadItem GetById(Guid id) => downloads.Keys.Where(dl => dl.Id == id).FirstOrDefault();
+        public IDownloadItem GetById(Guid id) => downloads.Keys.Where(dl => dl.Id == id).FirstOrDefault();
 
-        private IDownloader GetExistingDownload(DownloadItem item) => DownloadQueue.Contains(item) ? downloads[item] : throw new KeyNotFoundException();
+        private IDownloader GetExistingDownload(IDownloadItem item) => DownloadQueue.Contains(item) ? downloads[item] : throw new KeyNotFoundException();
 
-        public void Enqueue(DownloadItem item) => InternalAddDownload(item);
+        public void Enqueue(IDownloadItem item) => InternalAddDownload(item);
 
-        public DownloadProgress GetProgress(DownloadItem item) => GetExistingDownload(item).CurrentDownloadItem.Progress;
+        public DownloadProgress GetProgress(IDownloadItem item) => GetExistingDownload(item).CurrentDownloadItem.Progress;
 
-        public void Pause(DownloadItem item) => GetExistingDownload(item).Pause();
+        public void Pause(IDownloadItem item) => GetExistingDownload(item).Pause();
 
         public void PauseAll()
             => DownloadQueue.Where(item => item.Progress?.Status == DownloadStatus.Pending || item.Progress?.Status == DownloadStatus.Downloading)
             .ToList().ForEach(item => Pause(item));
 
-        public void Resume(DownloadItem item) => GetExistingDownload(item).Resume();
+        public void Resume(IDownloadItem item) => GetExistingDownload(item).Resume();
 
         public void ResumeAll()
             => DownloadQueue.Where(item => item.Progress?.Status == DownloadStatus.Paused).ToList().ForEach(item => Resume(item));
@@ -130,9 +130,19 @@ namespace Grindarr.Core.Downloaders
         private void LoadDownloads()
         {
             if (File.Exists(DLSTATE_PATH))
-                JsonConvert.DeserializeObject<List<DownloadItem>>(File.ReadAllText(DLSTATE_PATH)).ForEach(dl => Enqueue(dl));
+                foreach (var dl in JsonConvert.DeserializeObject<IEnumerable<IDownloadItem>>(File.ReadAllText(DLSTATE_PATH), new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                }))
+                    Enqueue(dl); 
         }
 
-        private void SaveDownloads() => File.WriteAllText(DLSTATE_PATH, JsonConvert.SerializeObject(downloads.Keys));
+        private void SaveDownloads()
+        {
+            File.WriteAllText(DLSTATE_PATH, JsonConvert.SerializeObject(downloads.Keys.ToArray(), new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.All
+            }));
+        }
     }
 }

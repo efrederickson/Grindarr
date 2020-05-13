@@ -25,13 +25,13 @@ namespace Grindarr.Core.Downloaders
         /// <summary>
         /// The item currently be downloaded by this downloader
         /// </summary>
-        public DownloadItem CurrentDownloadItem { get; }
+        public IDownloadItem CurrentDownloadItem { get; }
 
         /// <summary>
         /// Reset this downloader to download the specified item
         /// </summary>
         /// <param name="item">The new item to download</param>
-        public void SetItem(DownloadItem item);
+        public void SetItem(IDownloadItem item);
 
         /// <summary>
         /// Start the download

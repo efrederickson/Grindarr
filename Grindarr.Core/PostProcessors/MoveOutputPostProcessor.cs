@@ -11,7 +11,7 @@ namespace Grindarr.Core.PostProcessors
         public string Title => "Move Output";
         public string Description => "Move output file to destination folder";
 
-        public void Run(DownloadItem item)
+        public void Run(IDownloadItem item)
         {
             File.Move(item.GetDownloadingPath(), item.GetCompletedPath());
         }

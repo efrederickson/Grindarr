@@ -16,7 +16,7 @@ namespace Grindarr.Core.Downloaders
         /// <summary>
         /// The queue of download items, in their preferered order
         /// </summary>
-        public IEnumerable<DownloadItem> DownloadQueue { get; }
+        public IEnumerable<IDownloadItem> DownloadQueue { get; }
 
         public event EventHandler<DownloadEventArgs> DownloadCompleted;
         public event EventHandler<DownloadEventArgs> DownloadFailed;
@@ -27,26 +27,26 @@ namespace Grindarr.Core.Downloaders
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public DownloadItem GetById(Guid id);
+        public IDownloadItem GetById(Guid id);
 
         /// <summary>
         /// Returns the download progress for a specified item, if that item belongs to this download manager
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public DownloadProgress GetProgress(DownloadItem item);
+        public DownloadProgress GetProgress(IDownloadItem item);
 
         /// <summary>
         /// Adds a new download to the queue
         /// </summary>
         /// <param name="item"></param>
-        public void Enqueue(DownloadItem item);
+        public void Enqueue(IDownloadItem item);
 
         /// <summary>
         /// Pause a specified download, if that download belongs to this download manager
         /// </summary>
         /// <param name="item"></param>
-        public void Pause(DownloadItem item);
+        public void Pause(IDownloadItem item);
 
         /// <summary>
         /// Pauses all downloads
@@ -57,7 +57,7 @@ namespace Grindarr.Core.Downloaders
         /// Resume a specified download, if that download belongs to this download manager
         /// </summary>
         /// <param name="item"></param>
-        public void Resume(DownloadItem item);
+        public void Resume(IDownloadItem item);
 
         /// <summary>
         /// Resumes all downloads
@@ -68,7 +68,7 @@ namespace Grindarr.Core.Downloaders
         /// Cancels a specified download, if that download belongs to this download manager
         /// </summary>
         /// <param name="item"></param>
-        public void Cancel(DownloadItem item);
+        public void Cancel(IDownloadItem item);
 
         /// <summary>
         /// Cancels all downloads

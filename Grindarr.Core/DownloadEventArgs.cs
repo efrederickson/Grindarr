@@ -12,8 +12,8 @@ namespace Grindarr.Core
         /// <summary>
         /// The download item in question for this object
         /// </summary>
-        public DownloadItem Target { get; }
+        public IDownloadItem Target { get; }
 
-        public DownloadEventArgs(DownloadItem item) => Target = item;
+        public DownloadEventArgs(IDownloadItem item) => Target = item;
     }
 }

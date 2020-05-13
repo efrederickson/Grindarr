@@ -11,7 +11,7 @@ namespace Grindarr.Core.Downloaders.Implementations
     {
         protected PausableEventedDownloader downloader;
 
-        public DownloadItem CurrentDownloadItem { get; private set; }
+        public IDownloadItem CurrentDownloadItem { get; private set; }
 
         public event EventHandler<DownloadEventArgs> DownloadComplete;
         public event EventHandler<DownloadEventArgs> DownloadFailed;
@@ -49,9 +49,9 @@ namespace Grindarr.Core.Downloaders.Implementations
             DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
-        public virtual void SetItem(DownloadItem item) => SetItem(item, item.DownloadUri);
+        public virtual void SetItem(IDownloadItem item) => SetItem(item, item.DownloadUri);
 
-        protected virtual void SetItem(DownloadItem item, Uri actualDownloadUri)
+        protected virtual void SetItem(IDownloadItem item, Uri actualDownloadUri)
         {
             CurrentDownloadItem = item;
             item.DownloadingFilename = HttpUtility.UrlDecode(actualDownloadUri.Segments.Last());
