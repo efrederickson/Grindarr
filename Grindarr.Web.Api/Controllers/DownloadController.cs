@@ -15,8 +15,7 @@ namespace Grindarr.Web.Api.Controllers
         [HttpGet]
         public IEnumerable<IDownloadItem> Index()
         {
-            foreach (var dl in DownloadManager.Instance.DownloadQueue)
-                yield return dl;
+            return DownloadManager.Instance.DownloadQueue;
         }
 
         [HttpGet("{guid}")]

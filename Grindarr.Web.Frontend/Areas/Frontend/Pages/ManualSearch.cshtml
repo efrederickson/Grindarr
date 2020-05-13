@@ -3,6 +3,7 @@
 
 <div class="input-group mb-3">
     <input type="text" class="form-control" id="searchTextField" />
+    <input type="number" class="form-control small-fc-width" id="countTextField" value="100" />
     <div class="input-group-append">
         <button class="btn btn-success" id="searchButton">Search</button>
     </div>
@@ -27,12 +28,13 @@
 
     $("#searchButton").click(function () {
         var queryStr = $("#searchTextField").val();
+        var count = $("#countTextField").val();
 
         $('<div>', { class: "loader", id: "loader" }).appendTo($("#searchButton"));
         $("#searchButton").prop('disabled', true);
         $("#searchButton").addClass('disabled');
 
-        grindarr.actions.search(queryStr, function (data, errData) {
+        grindarr.actions.search(queryStr, count, function (data, errData) {
             $("#loader").remove();
             $("#searchButton").prop('disabled', false);
             $("#searchButton").removeClass('disabled');
@@ -103,6 +105,8 @@
                             alert("Failed to create download: " + errData.errorMessage);
                         }
                     });
+
+                    return false;
                 });
                 var li = $('<li>');
                 linkElement.appendTo(li);

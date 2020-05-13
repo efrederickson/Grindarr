@@ -16,13 +16,13 @@ namespace Grindarr.Core.Scrapers.Implementations
 
         public IEnumerable<string> GetSerializableConstructorArguments() => new[] { rootFolderUri.ToString() };
 
-        public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
+        public async IAsyncEnumerable<IContentItem> SearchAsync(string text, int count)
         {
-            await foreach (var item in RecursivelySearchDirectoriesAsync(rootFolderUri, text))
+            await foreach (var item in RecursivelySearchDirectoriesAsync(rootFolderUri, text).Take(count))
                 yield return item;
         }
 
-        public async IAsyncEnumerable<ContentItem> GetLatestItemsAsync(int count)
+        public async IAsyncEnumerable<IContentItem> GetLatestItemsAsync(int count)
         {
             //var results = ListDirectoryAsync(rootFolderUri).OrderByDescending(ci => ci.DatePosted).Take(count);
             //await foreach (var item in results)
@@ -31,7 +31,7 @@ namespace Grindarr.Core.Scrapers.Implementations
                 yield return item;
         }
 
-        protected async IAsyncEnumerable<ContentItem> GetLatestItemsFlattenedAsync(IAsyncEnumerable<ContentItem> items, int count)
+        protected async IAsyncEnumerable<IContentItem> GetLatestItemsFlattenedAsync(IAsyncEnumerable<IContentItem> items, int count)
         {
             await foreach (var item in items.OrderByDescending(ci => ci.DatePosted).Take(count))
                 if (item is FolderContentItem fci)
@@ -41,7 +41,7 @@ namespace Grindarr.Core.Scrapers.Implementations
                     yield return item;
         }
 
-        protected async IAsyncEnumerable<ContentItem> RecursivelySearchDirectoriesAsync(Uri dir, string query)
+        protected async IAsyncEnumerable<IContentItem> RecursivelySearchDirectoriesAsync(Uri dir, string query)
         {
             await foreach (var item in ListDirectoryAsync(dir))
             {
@@ -61,6 +61,6 @@ namespace Grindarr.Core.Scrapers.Implementations
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        protected abstract IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir);
+        protected abstract IAsyncEnumerable<IContentItem> ListDirectoryAsync(Uri dir);
     }
 }

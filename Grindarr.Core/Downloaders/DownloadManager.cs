@@ -61,8 +61,11 @@ namespace Grindarr.Core.Downloaders
         private void IDownloader_DownloadFailed(object sender, DownloadEventArgs e)
         {
             UpdateActiveDownloads();
-            downloads.Remove(e.Target);
-            File.Delete(e.Target.GetDownloadingPath());
+            Console.WriteLine($"Failed: {e.Target.DownloadUri}");
+            if (e.Target.Progress.Status == DownloadStatus.Canceled)
+                downloads.Remove(e.Target);
+            if (File.Exists(e.Target.GetDownloadingPath()))
+               File.Delete(e.Target.GetDownloadingPath());
             DownloadFailed?.Invoke(sender, e);
             SaveDownloads();
         }
@@ -84,9 +87,9 @@ namespace Grindarr.Core.Downloaders
             dl.DownloadComplete += IDownloader_DownloadCompleted;
             dl.DownloadFailed += IDownloader_DownloadFailed;
 
-            downloads[item] = dl;
+            downloads[dl.CurrentDownloadItem] = dl;
             // Fire event
-            DownloadAdded?.Invoke(this, new DownloadEventArgs(item));
+            DownloadAdded?.Invoke(this, new DownloadEventArgs(dl.CurrentDownloadItem));
 
             UpdateActiveDownloads();
             SaveDownloads();
@@ -101,7 +104,7 @@ namespace Grindarr.Core.Downloaders
             if (IgnoreStalledDownloads.HasValue && IgnoreStalledDownloads.Value)
                 res = res.Where((p) => p.CurrentDownloadItem.Progress.SpeedTracker.GetBytesPerSecond() > StalledDownloadCutoff);
 
-            return res.Select((s) => s.CurrentDownloadItem);
+            return res.Select((s) => s.CurrentDownloadItem).ToList(); // Resolve promises now, prevent problems later. I hope.
         }
 
         public void Cancel(IDownloadItem item) => downloads[item].Cancel();

@@ -70,10 +70,12 @@ var grindarr = (function () {
                 return grindarr.authenticatedRequest(url, data, callback, method, synchronous);
             };
 
+            var finalUrl = url.indexOf("?") == -1 ? url + "?apikey=" + grindarr.API_KEY : url + "&apikey=" + grindarr.API_KEY;
+
             if (synchronous) {
                 var res = null;
                 $.ajax({
-                    url: url + "?apikey=" + grindarr.API_KEY,
+                    url: finalUrl,
                     type: method,
                     async: false,
                     //dataType: 'json',
@@ -90,7 +92,7 @@ var grindarr = (function () {
                 return res;
             } else {
                 $.ajax({
-                    url: url + "?apikey=" + grindarr.API_KEY,
+                    url: finalUrl,
                     type: method,
                     //dataType: 'json',
                     contentType: 'application/json',
@@ -296,8 +298,9 @@ var grindarr = (function () {
         },
 
         actions: {
-            search: function (query, cb) {
-                return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_ACTIONS_SEARCH + query, null, cb, "POST");
+            search: function (query, count = 100, cb) {
+                // TODO: fix url construction...
+                return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_ACTIONS_SEARCH + query + "?count=" + count, null, cb, "POST");
             }
         },
     }

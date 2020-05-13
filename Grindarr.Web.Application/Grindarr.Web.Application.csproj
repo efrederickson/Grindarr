@@ -15,6 +15,7 @@
     <ProjectReference Include="..\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper.csproj" />
     <ProjectReference Include="..\Grindarr.Core.Scrapers.GetComicsDotInfo\Grindarr.Core.Scrapers.GetComicsDotInfo.csproj" />
     <ProjectReference Include="..\Grindarr.Core.Scrapers.NginxOpenDirectoryScraper\Grindarr.Core.Scrapers.NginxOpenDirectoryScraper.csproj" />
+    <ProjectReference Include="..\Grindarr.Soulseek\Grindarr.Soulseek.csproj" />
     <ProjectReference Include="..\Grindarr.Web.Api.Authorization\Grindarr.Web.Api.Authorization.csproj" />
     <ProjectReference Include="..\Grindarr.Web.Api\Grindarr.Web.Api.csproj" />
     <ProjectReference Include="..\Grindarr.Web.Frontend\Grindarr.Web.Frontend.csproj" />

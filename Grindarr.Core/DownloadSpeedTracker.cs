@@ -82,7 +82,12 @@ namespace Grindarr.Core
             if (_changes.Count == 0)
                 return 0;
 
-            TimeSpan timespan = _changes.Last().Item1 - _changes.First().Item1;
+            // Something seems to occasionally happen here
+            // The collection is modified between the Last() and First() or during the Sum() calls and 
+            // then something fails
+            var copied = _changes.ToArray();
+
+            TimeSpan timespan = copied.Last().Item1 - copied.First().Item1;
             long bytes = _changes.Sum(t => t.Item2);
 
             double rate = bytes / timespan.TotalSeconds;

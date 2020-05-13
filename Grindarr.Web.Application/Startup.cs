@@ -40,7 +40,9 @@ namespace Grindarr.Web.Application
             new Core.Scrapers.ApacheOpenDirectoryScraper.ApacheOpenDirectoryScraper(new Uri("http://dummy.com"));
             new Core.Scrapers.GetComicsDotInfo.GetComicsScraper();
             new Core.Scrapers.NginxOpenDirectoryScraper.NginxOpenDirectoryScraper("http://dummy.com");
+            new Grindarr.Soulseek.SoulseekScraper();
             Grindarr.Core.Downloaders.DownloaderFactory.Register("zippyshare.com", new Grindarr.Core.Downloaders.Zippyshare.ZippyshareDownloader());
+            Grindarr.Core.Downloaders.DownloaderFactory.Register("soulseek", new Grindarr.Soulseek.SoulSeekDownloader());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

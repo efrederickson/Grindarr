@@ -13,7 +13,7 @@ namespace Grindarr.Core.Scrapers
     {
         public Task<SyndicationFeed> CreateSyndicationFeedFromLatestItemsAsync(int count) => CreateSyndicationFeedAsync(GetLatestItems(count));
 
-        public async Task<SyndicationFeed> CreateSyndicationFeedAsync(IAsyncEnumerable<ContentItem> sourceItems)
+        public async Task<SyndicationFeed> CreateSyndicationFeedAsync(IAsyncEnumerable<IContentItem> sourceItems)
         {
             var items = new List<SyndicationItem>();
             await foreach (var contentItem in sourceItems)

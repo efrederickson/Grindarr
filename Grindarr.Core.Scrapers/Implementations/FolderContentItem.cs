@@ -6,5 +6,6 @@ namespace Grindarr.Core.Scrapers.Implementations
 {
     public class FolderContentItem : ContentItem
     {
+
     }
 }

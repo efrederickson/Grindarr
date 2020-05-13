@@ -33,6 +33,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Downloaders", "Downloaders"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Core.Downloaders.Zippyshare", "Grindarr.Core.Downloaders.Zippyshare\Grindarr.Core.Downloaders.Zippyshare.csproj", "{E675F908-DD76-495E-879E-58474C821AA9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{43600B1D-2C89-41E6-A68B-82CB34F89806}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grindarr.Soulseek", "Grindarr.Soulseek\Grindarr.Soulseek.csproj", "{2F26DB5D-59DF-4AA1-AA93-01B1F72BB476}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +96,10 @@ Global
 		{E675F908-DD76-495E-879E-58474C821AA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E675F908-DD76-495E-879E-58474C821AA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E675F908-DD76-495E-879E-58474C821AA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F26DB5D-59DF-4AA1-AA93-01B1F72BB476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F26DB5D-59DF-4AA1-AA93-01B1F72BB476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F26DB5D-59DF-4AA1-AA93-01B1F72BB476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F26DB5D-59DF-4AA1-AA93-01B1F72BB476}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

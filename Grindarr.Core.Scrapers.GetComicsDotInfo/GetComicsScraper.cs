@@ -19,13 +19,13 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
 
         public IEnumerable<string> GetSerializableConstructorArguments() => default;
 
-        public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
+        public async IAsyncEnumerable<IContentItem> SearchAsync(string text, int count)
         {
-            await foreach (var result in DoSearchAsync(text))
+            await foreach (var result in DoSearchAsync(text).Take(count))
                 yield return result;
         }
 
-        public async IAsyncEnumerable<ContentItem> GetLatestItemsAsync(int count)
+        public async IAsyncEnumerable<IContentItem> GetLatestItemsAsync(int count)
         {
             var feed = SyndicationFeed.Load(XmlReader.Create(feedUrlBase));
             var items = feed.Items.OrderByDescending(i => i.PublishDate).Take(count);
@@ -41,7 +41,7 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
             }
         }
 
-        private async IAsyncEnumerable<ContentItem> DoSearchAsync(string query)
+        private async IAsyncEnumerable<IContentItem> DoSearchAsync(string query)
         {
             var httpResponse = await httpClient.GetAsync(new Uri(string.Format(searchUrlBase, query)));
             var responseBodyText = httpResponse.Content.ReadAsStringAsync();
@@ -58,12 +58,12 @@ namespace Grindarr.Core.Scrapers.GetComicsDotInfo
             }
         }
 
-        private async Task<ContentItem> ParsePageContentsAsync(Uri url)
+        private async Task<IContentItem> ParsePageContentsAsync(Uri url)
         {
             // The timeout here is 3 hours, why? Based on my monitoring of the website,
             // it doesn't update too often - the individual pages even less often - therefore a 3 hour timeout
             // Should be a good balance. Also reduces hammering the poor, useful website. 
-            var contentItem = ContentItemStore.GetOrCreateBySourceUrl(url, timeout: TimeSpan.FromHours(3));
+            var contentItem = ContentItemStore.GetOrCreateBySourceUrl<ContentItem>(url, timeout: TimeSpan.FromHours(3));
 
             var httpResponse = await httpClient.GetAsync(url);
             var document = new HtmlDocument();

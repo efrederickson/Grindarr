@@ -25,13 +25,13 @@ namespace Grindarr.Core.Scrapers
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public async IAsyncEnumerable<ContentItem> SearchAsync(string text)
+        public async IAsyncEnumerable<IContentItem> SearchAsync(string text, int count)
         {
-            await foreach (var result in scrapers.Select(s => s.SearchAsync(text)).Merge())
+            await foreach (var result in scrapers.Select(s => s.SearchAsync(text, count)).Merge().Take(count))
                 yield return result;
         }
 
-        public async IAsyncEnumerable<ContentItem> GetLatestItems(int count)
+        public async IAsyncEnumerable<IContentItem> GetLatestItems(int count)
         {
             var results = scrapers.Select(s => s.GetLatestItemsAsync(count)).Merge().OrderByDescending(ci => ci.DatePosted).Take(count);
             await foreach (var result in results)

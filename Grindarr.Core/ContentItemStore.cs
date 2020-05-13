@@ -9,13 +9,13 @@ namespace Grindarr.Core
     {
         private struct StoredContentItem
         {
-            public ContentItem Item { get; set; }
+            public IContentItem Item { get; set; }
             public DateTime CachedDateTime { get; set; }
             public TimeSpan Timeout { get; set; }
 
             public bool Expired() => DateTime.Now - CachedDateTime >= Timeout;
 
-            public StoredContentItem(ContentItem item, DateTime cached, TimeSpan timeout)
+            public StoredContentItem(IContentItem item, DateTime cached, TimeSpan timeout)
             {
                 Item = item;
                 CachedDateTime = cached;
@@ -27,14 +27,14 @@ namespace Grindarr.Core
         //private static HashSet<Tuple<ContentItem, DateTime>> items = new HashSet<Tuple<ContentItem, DateTime>>(new ContentItemComparer());
         private static List<StoredContentItem> items = new List<StoredContentItem>();
 
-        public static ContentItem GetBySourceUrl(Uri source) => FilterExpiredItems().Where(i => i.Source == source).FirstOrDefault();
+        public static IContentItem GetBySourceUrl(Uri source) => FilterExpiredItems().Where(i => i.Source == source).FirstOrDefault();
 
         /// <summary>
         /// Gets or creates a <code>ContentItem</code> by source <code>Uri</code>.
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static ContentItem GetOrCreateBySourceUrl(Uri source) => GetOrCreateBySourceUrl(source, DEFAULT_ITEM_TIMEOUT);
+        public static T GetOrCreateBySourceUrl<T>(Uri source) where T: IContentItem => GetOrCreateBySourceUrl<T>(source, DEFAULT_ITEM_TIMEOUT);
 
         /// <summary>
         /// Gets or creates a <code>ContentItem</code> by source <code>Uri</code>.
@@ -42,28 +42,26 @@ namespace Grindarr.Core
         /// <param name="source"></param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static ContentItem GetOrCreateBySourceUrl(Uri source, TimeSpan timeout)
+        public static T GetOrCreateBySourceUrl<T>(Uri source, TimeSpan timeout) where T: IContentItem
         {
-            var res = GetBySourceUrl(source);
+            T res = (T)GetBySourceUrl(source);
             if (res == null)
             {
-                res = new ContentItem()
-                {
-                    Source = source
-                };
+                res = Activator.CreateInstance<T>();
+                res.Source = source;
                 items.Add(new StoredContentItem(item: res, cached: DateTime.Now, timeout: timeout));
             }
             return res;
         }
 
-        public static ContentItem GetByDownloadUrl(Uri dlUri) => FilterExpiredItems().Where(i => i.DownloadLinks.Contains(dlUri)).FirstOrDefault();
+        public static IContentItem GetByDownloadUrl(Uri dlUri) => FilterExpiredItems().Where(i => i.DownloadLinks.Contains(dlUri)).FirstOrDefault();
 
         /// <summary>
         /// Gets or creates a tracked <code>ContentItem</code> by download <code>Uri</code>.
         /// </summary>
         /// <param name="dlUri">Uri to find a ContentItem by</param>
         /// <returns></returns>
-        public static ContentItem GetOrCreateByDownloadUrl(Uri dlUri) => GetOrCreateByDownloadUrl(dlUri, DEFAULT_ITEM_TIMEOUT);
+        public static T GetOrCreateByDownloadUrl<T>(Uri dlUri) where T: IContentItem => GetOrCreateByDownloadUrl<T>(dlUri, DEFAULT_ITEM_TIMEOUT);
 
         /// <summary>
         /// Gets or creates a tracked <code>ContentItem</code> by download <code>Uri</code>.
@@ -71,21 +69,19 @@ namespace Grindarr.Core
         /// <param name="dlUri"></param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static ContentItem GetOrCreateByDownloadUrl(Uri dlUri, TimeSpan timeout)
+        public static T GetOrCreateByDownloadUrl<T>(Uri dlUri, TimeSpan timeout) where T: IContentItem
         {
-            var res = GetByDownloadUrl(dlUri);
+            T res = (T)GetByDownloadUrl(dlUri);
             if (res == null)
             {
-                res = new ContentItem()
-                {
-                    DownloadLinks = { dlUri }
-                };
+                res = Activator.CreateInstance<T>();
+                res.DownloadLinks.Add(dlUri);
                 items.Add(new StoredContentItem(item: res, cached: DateTime.Now, timeout: timeout));
             }
             return res;
         }
 
-        private static IEnumerable<ContentItem> FilterExpiredItems()
+        private static IEnumerable<IContentItem> FilterExpiredItems()
         {
             // Look at this unholy abomination of a line
             // While i admire the conciseness, it's not very readable

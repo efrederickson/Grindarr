@@ -8,7 +8,10 @@
         <th class="sorttable_numeric">Progress</th>
         <th class="sorttable_numeric">Speed</th>
         <th>State</th>
-        <th>Actions</th>
+        <th class="sorttable_nosort">
+            Actions
+            <button class="btn btn-sm btn-danger" onclick="deleteAll();">Cancel All</button>
+        </th>
     </tr>
 </table>
 
@@ -30,7 +33,7 @@
 
             $('<button>', {
                 class: 'btn btn-info',
-                text: 'Pause/Resume',
+                text: 'Loading action...',
                 id: id + "-togglePausedButton"
             }).click(function () {
                 grindarr.getDownload(id, function (data, errData) {
@@ -145,4 +148,20 @@
         setInterval(updateDownloads, 2000);
         updateDownloads();
     })();
+
+    function deleteAll() {
+        if (confirm("Are you sure you want to cancel ALL downloads?")) {
+            $.each($("tr"), function (idx, element) {
+                var contentId = $(element).attr("content-id");
+                if (contentId != null) {
+                    console.log("cancel all: " + contentId);
+                    grindarr.cancelDownload(contentId, function (data, errData) {
+                        if (errData != null) {
+                            alert("Failed to delete download: " + errData.errorMessage);
+                        }
+                    });
+                }
+            });
+        }
+    }
 </script>

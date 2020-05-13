@@ -10,7 +10,7 @@ namespace Grindarr.Core
         /// <summary>
         /// The <code>ContentItem</code> that this object was created for
         /// </summary>
-        public ContentItem Content { get; set; }
+        public IContentItem Content { get; set; }
 
         /// <summary>
         /// The selected download uri for this download item - it may not be one in the <code>Content</code>, due to it being transformed by downloaders

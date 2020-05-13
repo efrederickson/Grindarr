@@ -13,9 +13,9 @@ namespace Grindarr.Web.Api.Controllers
     public class ActionsController
     {
         [HttpPost("search/{query?}")]
-        public async IAsyncEnumerable<ContentItem> SearchAction(string query)
+        public async IAsyncEnumerable<IContentItem> SearchAction(string query, int count = 100)
         {
-            await foreach (var result in ScraperManager.Instance.SearchAsync(query))
+            await foreach (var result in ScraperManager.Instance.SearchAsync(query, count))
                 yield return result;
         }
     }

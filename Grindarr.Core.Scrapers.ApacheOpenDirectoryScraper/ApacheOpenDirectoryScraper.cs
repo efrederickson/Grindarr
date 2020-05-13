@@ -15,7 +15,7 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
         public ApacheOpenDirectoryScraper(Uri rootFolderUri) : base(rootFolderUri) { }
         public ApacheOpenDirectoryScraper(string rootFolderUriStr) : base(rootFolderUriStr) { }
 
-        protected override async IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir)
+        protected override async IAsyncEnumerable<IContentItem> ListDirectoryAsync(Uri dir)
         {
             var httpResponse = await httpClient.GetAsync(dir);
             var responseBodyText = httpResponse.Content.ReadAsStringAsync();
@@ -35,9 +35,9 @@ namespace Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper
                     var dateNode = linkNode.ParentNode.NextSibling;
                     var sizeNode = dateNode?.NextSibling;
 
-                    ContentItem item = relativeLink.EndsWith("/")
-                        ? new FolderContentItem()
-                        : ContentItemStore.GetOrCreateByDownloadUrl(completeUri);
+                    IContentItem item = relativeLink.EndsWith("/")
+                        ? (IContentItem)new FolderContentItem()
+                        : ContentItemStore.GetOrCreateByDownloadUrl<ContentItem>(completeUri);
 
                     item.Source = dir;
                     item.Title = relativeLink;

@@ -24,11 +24,6 @@ namespace Grindarr.Core.Downloaders.Implementations
             DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
-        public virtual DownloadProgress GetProgress()
-        {
-            return CurrentDownloadItem.Progress;
-        }
-
         public virtual void Pause()
         {
             if (CurrentDownloadItem.Progress.Status != DownloadStatus.Downloading && CurrentDownloadItem.Progress.Status != DownloadStatus.Pending)

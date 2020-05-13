@@ -17,13 +17,13 @@ namespace Grindarr.Core.Scrapers
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public IAsyncEnumerable<ContentItem> SearchAsync(string text);
+        public IAsyncEnumerable<IContentItem> SearchAsync(string text, int count);
 
         /// <summary>
         /// Return <code>count</code> latest items from the source. 
         /// </summary>
         /// <param name="count">Return up to this many results</param>
         /// <returns></returns>
-        public IAsyncEnumerable<ContentItem> GetLatestItemsAsync(int count);
+        public IAsyncEnumerable<IContentItem> GetLatestItemsAsync(int count);
     }
 }

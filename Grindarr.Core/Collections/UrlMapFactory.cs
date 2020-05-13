@@ -9,7 +9,7 @@ namespace Grindarr.Core.Collections
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TDefault"></typeparam>
-    public abstract class DomainMapFactory<T, TDefault> where TDefault : T
+    public abstract class UrlMapFactory<T, TDefault> where TDefault : T
     {
         protected static readonly Dictionary<string, Type> typeMap = new Dictionary<string, Type>();
 

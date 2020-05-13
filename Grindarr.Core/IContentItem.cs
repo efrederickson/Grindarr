@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 
 namespace Grindarr.Core
 {
-    public class ContentItem : IContentItem
+    public interface IContentItem
     {
+
         /// <summary>
         /// The title or name of the file / content
         /// </summary>
@@ -25,7 +26,7 @@ namespace Grindarr.Core
         /// A list of available download links (for example, if the source has
         /// links for Mega, Dropbox, or direct). 
         /// </summary>
-        public HashSet<Uri> DownloadLinks { get; set; } = new HashSet<Uri>();
+        public HashSet<Uri> DownloadLinks { get; set; }
 
         /// <summary>
         /// The reported size of the content from the source. May not be an accurate size.

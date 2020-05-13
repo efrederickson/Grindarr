@@ -13,7 +13,7 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
         public NginxOpenDirectoryScraper(Uri rootFolderUri) : base(rootFolderUri) { }
         public NginxOpenDirectoryScraper(string rootFolderUriStr) : base(rootFolderUriStr) { }
 
-        protected override async IAsyncEnumerable<ContentItem> ListDirectoryAsync(Uri dir)
+        protected override async IAsyncEnumerable<IContentItem> ListDirectoryAsync(Uri dir)
         {
             var httpResponse = await httpClient.GetAsync(dir);
             var document = new HtmlDocument();
@@ -28,9 +28,9 @@ namespace Grindarr.Core.Scrapers.NginxOpenDirectoryScraper
                 var dateText = string.Join(" ", split.Take(split.Length - 1));
                 var sizeText = split.Last();
 
-                ContentItem item = relativeLink.EndsWith("/")
-                    ? new FolderContentItem()
-                    : ContentItemStore.GetOrCreateByDownloadUrl(completeUri);
+                IContentItem item = relativeLink.EndsWith("/")
+                    ? (IContentItem)new FolderContentItem()
+                    : ContentItemStore.GetOrCreateByDownloadUrl<ContentItem>(completeUri);
 
                 item.Source = dir;
                 item.Title = relativeLink;
