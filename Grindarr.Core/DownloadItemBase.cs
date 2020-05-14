@@ -7,7 +7,10 @@ using System.Web;
 
 namespace Grindarr.Core
 {
-    public class DownloadItemBase : IDownloadItem
+    /// <summary>
+    /// Provides a bare, generic implementation of a download item to avoid duplicating effort
+    /// </summary>
+    public abstract class DownloadItemBase : IDownloadItem
     {
         /// <summary>
         /// The <code>ContentItem</code> that this object was created for

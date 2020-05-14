@@ -9,9 +9,17 @@ using System.Web;
 
 namespace Grindarr.Core.Net
 {
+    /// <summary>
+    /// Provides a generic utility to download files. 
+    /// It follows redirects, raises events on download start/stop/change, 
+    /// and is pausable/resumable from where it left off (on disk)
+    /// </summary>
     public class PausableEventedDownloader
     {
-        private const int CHUNK_SIZE = 2048;
+        /// <summary>
+        /// The amount of bytes read from the network at once
+        /// </summary>
+        private const int CHUNK_SIZE = 4096;
 
         private bool doDownload = true;
         private bool failed = false;
@@ -34,10 +42,22 @@ namespace Grindarr.Core.Net
             this.Filename = file;
         }
 
+        /// <summary>
+        /// Whether the download is currently paused or stopped
+        /// </summary>
+        /// <returns></returns>
         public bool IsPaused() => !doDownload;
 
+        /// <summary>
+        /// Whether the download has completed (assuming size > 0)
+        /// </summary>
+        /// <returns></returns>
         public bool IsDone() => Progress == Size && Size > 0;
 
+        /// <summary>
+        /// Whether the download has failed
+        /// </summary>
+        /// <returns></returns>
         public bool HasFailed() => failed;
 
         public async void StartDownloadAsync()

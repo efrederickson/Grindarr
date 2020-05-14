@@ -12,6 +12,9 @@ using System.Web;
 
 namespace Grindarr.Soulseek
 {
+    /// <summary>
+    /// Implementation of a downloader to download a given soulseek file
+    /// </summary>
     public class SoulSeekDownloader : IDownloader
     {
         public IDownloadItem CurrentDownloadItem => CurrentSSDownloadItem;
@@ -79,7 +82,7 @@ namespace Grindarr.Soulseek
             };
         }
 
-        private async Task StartWorkerAsync()
+        private async void StartWorkerAsync()
         {
             if (cancellationToken != null)
                 throw new InvalidOperationException("Cannot start download when cancellation token already exists");

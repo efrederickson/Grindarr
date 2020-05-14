@@ -16,7 +16,8 @@
         Paused = 1,
 
         /// <summary>
-        /// The download is currently downloading
+        /// The download is currently downloading, 
+        /// whether that means actively receiving data or stalled.
         /// </summary>
         Downloading = 2,
 

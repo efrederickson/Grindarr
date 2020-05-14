@@ -2,13 +2,11 @@
 
 namespace Grindarr.Core
 {
+    /// <summary>
+    /// Event args used to pass information about an <code>IDownloadItem</code> that has changed in some way
+    /// </summary>
     public class DownloadEventArgs : EventArgs
     {
-        /// <summary>
-        /// Returns the download progress of the <code>Target</code> of this object
-        /// </summary>
-        public DownloadProgress Progress => Target.Progress;
-
         /// <summary>
         /// The download item in question for this object
         /// </summary>

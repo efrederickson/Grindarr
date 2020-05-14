@@ -25,7 +25,7 @@ namespace Grindarr.Core.Scrapers
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public async IAsyncEnumerable<IContentItem> SearchAsync(string text, int count)
+        public async IAsyncEnumerable<IContentItem> SearchAsync(string text, int count = 100)
         {
             await foreach (var result in scrapers.Select(s => s.SearchAsync(text, count)).Merge().Take(count))
                 yield return result;
@@ -38,6 +38,10 @@ namespace Grindarr.Core.Scrapers
                 yield return result;
         }
 
+        /// <summary>
+        /// Add an instance of a scraper to the list of tracked ones
+        /// </summary>
+        /// <param name="scraper"></param>
         public void Register(IScraper scraper)
         {
             if (!scrapers.Contains(scraper))
@@ -45,6 +49,11 @@ namespace Grindarr.Core.Scrapers
             SaveScrapers();
         }
 
+        /// <summary>
+        /// Remove an instance of a scraper from the list of tracked ones
+        /// </summary>
+        /// <param name="scraper"></param>
+        /// <returns></returns>
         public bool Unregister(IScraper scraper)
         {
             bool res = false;
@@ -57,6 +66,12 @@ namespace Grindarr.Core.Scrapers
 
         public IEnumerable<IScraper> GetRegisteredScrapers() => scrapers;
 
+        /// <summary>
+        /// Provides the logic for instantiating an instance of a scraper.
+        /// </summary>
+        /// <param name="t">The type to create, it will be checked to ensure it implements <code>IScraper</code></param>
+        /// <param name="arguments">List of arguments that will be passed to the constructor. This list will be filtered to remove empty strings</param>
+        /// <returns></returns>
         private IScraper CreateScraperWithoutRegistering(Type t, IEnumerable<string> arguments)
         {
             if (t.GetInterfaces().Contains(typeof(IScraper)) == false)
@@ -66,6 +81,12 @@ namespace Grindarr.Core.Scrapers
             return instance;
         }
 
+        /// <summary>
+        /// Initializes a new instance of a scraper for use. It will be persisted into the config
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="arguments"></param>
+        /// <returns></returns>
         public IScraper CreateAndRegisterScraper(Type t, IEnumerable<string> arguments)
         {
             var scraper = CreateScraperWithoutRegistering(t, arguments);
@@ -73,6 +94,9 @@ namespace Grindarr.Core.Scrapers
             return scraper;
         }
 
+        /// <summary>
+        /// Loads scrapers from config
+        /// </summary>
         private void LoadScrapers()
         {
             foreach (var scraper in Config.Instance.GetEnumerableValue<ScraperModel>(CONFIG_SECTION))
@@ -85,10 +109,17 @@ namespace Grindarr.Core.Scrapers
             }
         }
 
+        /// <summary>
+        /// Saves configured scrapers to config
+        /// </summary>
         private void SaveScrapers() 
             => Config.Instance.SetValue(CONFIG_SECTION, 
                 scrapers.Select(s => ScraperModel.CreateFromScraper(s)).ToList());
 
+        /// <summary>
+        /// Searches all loaded assemblies for non-abstract classes implementing <code>IScraper</code> and returns a list of them
+        /// </summary>
+        /// <returns></returns>
         public static IEnumerable<Type> GetAllScraperClasses() 
             => AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(asm => asm.GetTypes())

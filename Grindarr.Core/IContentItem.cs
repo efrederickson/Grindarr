@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Grindarr.Core
 {
+    /// <summary>
+    /// Provides information about a piece of content, but not about downloading it
+    /// </summary>
     public interface IContentItem
     {
 

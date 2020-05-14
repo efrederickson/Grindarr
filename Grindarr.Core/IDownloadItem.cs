@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Grindarr.Core
 {
+    /// <summary>
+    /// Provides and tracks information about a download
+    /// </summary>
     public interface IDownloadItem
     {
 

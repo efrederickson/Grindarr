@@ -12,6 +12,11 @@ namespace Grindarr.Soulseek
 {
     public class SoulseekScraper : IScraper
     {
+        /// <summary>
+        /// Soulseek does not support this type of content finding, due to the nature of how it works
+        /// </summary>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public async IAsyncEnumerable<IContentItem> GetLatestItemsAsync(int count)
         {
             yield break;

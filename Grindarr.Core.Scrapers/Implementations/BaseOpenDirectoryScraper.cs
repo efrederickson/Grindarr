@@ -6,6 +6,10 @@ using System.Text;
 
 namespace Grindarr.Core.Scrapers.Implementations
 {
+    /// <summary>
+    /// Provides a base for open directory scrapers such as Apache. 
+    /// Simply implement the one method that parsed the directory and enjoy an easier life. 
+    /// </summary>
     public abstract class BaseOpenDirectoryScraper : IScraper
     {
         protected static readonly HttpClient httpClient = new HttpClient();

@@ -1,5 +1,8 @@
 ﻿namespace Grindarr.Core.PostProcessors
 {
+    /// <summary>
+    /// The interface used for implementing a post processor
+    /// </summary>
     public interface IPostProcessor
     {
         /// <summary>

@@ -81,6 +81,10 @@ namespace Grindarr.Core
             return res;
         }
 
+        /// <summary>
+        /// Filters the list of stored items, mutating it and then returning it to remove expired items
+        /// </summary>
+        /// <returns></returns>
         private static IEnumerable<IContentItem> FilterExpiredItems()
         {
             // Look at this unholy abomination of a line

@@ -54,7 +54,7 @@ namespace Grindarr.ConsoleApp
 
         private static void Instance_DownloadProgressChanged(object sender, DownloadEventArgs e)
         {
-            Console.WriteLine("Progress Changed: " + (e.Progress.Percentage * 100) + "% at " + e.Progress.SpeedTracker.GetBytesPerSecondString() +
+            Console.WriteLine("Progress Changed: " + (e.Target.Progress.Percentage * 100) + "% at " + e.Target.Progress.SpeedTracker.GetBytesPerSecondString() +
                  "fn: " + e.Target.DownloadingFilename + " -> " + e.Target.CompletedFilename);
         }
 
