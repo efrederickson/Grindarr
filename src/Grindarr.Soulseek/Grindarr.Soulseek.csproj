@@ -5,14 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\Soulseek.NET\src\Soulseek\Soulseek.csproj" />
     <ProjectReference Include="..\Grindarr.Core.Scrapers\Grindarr.Core.Scrapers.csproj" />
     <ProjectReference Include="..\Grindarr.Core\Grindarr.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Soulseek">
-      <HintPath>..\..\Soulseek.NET\src\Soulseek\bin\Debug\netstandard2.0\Soulseek.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

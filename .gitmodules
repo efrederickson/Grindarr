@@ -1,0 +1,3 @@
+[submodule "lib/Soulseek.NET"]
+	path = lib/Soulseek.NET
+	url = https://github.com/jpdillingham/Soulseek.NET.git
