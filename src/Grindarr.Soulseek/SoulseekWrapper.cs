@@ -34,18 +34,21 @@ namespace Grindarr.Soulseek
         /// <returns></returns>
         private SoulseekClient GetOrInitializeClient()
         {
-            client ??= new SoulseekClient(new SoulseekClientOptions());
-
-            if (client.State != SoulseekClientStates.LoggedIn)
+            lock (this)
             {
-                var username = GetUsername();
-                var password = GetPassword();
+                client ??= new SoulseekClient(new SoulseekClientOptions());
 
-                if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
-                    client.ConnectAsync(username, password).Wait();
+                if (!client.State.HasFlag(SoulseekClientStates.LoggedIn))
+                {
+                    var username = GetUsername();
+                    var password = GetPassword();
+
+                    if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+                        client.ConnectAsync(username, password).Wait();
+                }
+
+                return client;
             }
-
-            return client;
         }
 
         /// <summary>
@@ -56,10 +59,7 @@ namespace Grindarr.Soulseek
         {
             Config.Instance.SetValue<string>(CONFIG_USERNAME, username);
             if (client != null)
-            {
                 client.Disconnect();
-                client = null;
-            }
         }
 
         /// <summary>
@@ -70,10 +70,7 @@ namespace Grindarr.Soulseek
         {
             Config.Instance.SetValue<string>(CONFIG_PASSWORD, password);
             if (client != null)
-            {
                 client.Disconnect();
-                client = null;
-            }
         }
 
         /// <summary>
