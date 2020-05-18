@@ -70,18 +70,15 @@ namespace Grindarr.Soulseek
         public void SetItem(IDownloadItem item)
         {
             CurrentSSDownloadItem = SoulseekDownloadItem.ParseFrom(item);
-            item.DownloadingFilename = HttpUtility.UrlDecode(item.DownloadUri.Segments.Last());
-            item.CompletedFilename = item.DownloadingFilename;
+            CurrentSSDownloadItem.DownloadingFilename = HttpUtility.UrlDecode(CurrentSSDownloadItem.DownloadUri.Segments.Last());
+            CurrentSSDownloadItem.CompletedFilename = CurrentSSDownloadItem.DownloadingFilename;
 
-            item.Progress = new DownloadProgress
+            CurrentSSDownloadItem.Progress = new DownloadProgress
             {
                 BytesTotal = 0,
                 BytesDownloaded = 0,
                 Status = DownloadStatus.Pending
             };
-
-            // Now it's ready, invoke the handler to get download manager to start (or update)
-            DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         private async void StartWorkerAsync()
@@ -91,13 +88,27 @@ namespace Grindarr.Soulseek
 
             cancellationToken = new CancellationTokenSource();
             CurrentDownloadItem.Progress.Status = DownloadStatus.Downloading;
-            byte[] bytes = null;
+
+            FileStream fileStream = null;
+            Exception thrownException = null;
             try
             {
+                FileMode mode = FileMode.CreateNew;
+
+                long progress = 0;
+                if (System.IO.File.Exists(CurrentDownloadItem.GetDownloadingPath()))
+                {
+                    mode = FileMode.Append;
+                    progress = new FileInfo(CurrentDownloadItem.GetDownloadingPath()).Length;
+                }
+
+                fileStream = new FileStream(CurrentDownloadItem.GetDownloadingPath(), mode);
+
                 var task = SoulseekWrapper.Instance.GetClient()?.DownloadAsync(
                     username: CurrentSSDownloadItem.SoulseekUsername,
                     filename: CurrentSSDownloadItem.SoulseekFilename,
-                    startOffset: 0,
+                    outputStream: fileStream,
+                    startOffset: progress,
                     cancellationToken: cancellationToken.Token,
                     options: new TransferOptions(
                         stateChanged: (e) =>
@@ -133,27 +144,31 @@ namespace Grindarr.Soulseek
                     Console.WriteLine("Did not create task - assuming Soulseek authentication has not been set");
                     throw new InvalidOperationException("Unable to create download task");
                 }
-                bytes = await task;
+                await task;
             } 
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception occured during soulseek download for {CurrentSSDownloadItem.SoulseekFilename}: {ex.Message}");
-                CurrentDownloadItem.Progress.Status = DownloadStatus.Failed;
-                DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
-                cancellationToken = null;
-                return;
+                thrownException = ex;
             }
-
-            if (bytes != null)
+            finally
             {
-                System.IO.File.WriteAllBytes(CurrentSSDownloadItem.GetDownloadingPath(), bytes);
-                CurrentDownloadItem.Progress.Status = DownloadStatus.Completed;
-                DownloadComplete?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                // Dispose of resources
+                fileStream?.Dispose();
                 cancellationToken = null;
-            }
-            else
-            {
 
+                if (thrownException != null)
+                {
+                    // Failed
+                    CurrentDownloadItem.Progress.Status = DownloadStatus.Failed;
+                    DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                } 
+                else
+                {
+                    // Success
+                    CurrentDownloadItem.Progress.Status = DownloadStatus.Completed;
+                    DownloadComplete?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                }
             }
         }
     }
