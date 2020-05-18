@@ -129,7 +129,7 @@ namespace Grindarr.Core.Net
             catch (Exception ex) // WebException, IOException
             {
                 failed = true;
-                throw ex;
+                //throw ex;
             }
             finally
             {
