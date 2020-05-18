@@ -1,0 +1,119 @@
+﻿@page
+@model Grindarr.Web.Frontend.Areas.Frontend.Pages.ViewLatestItemsModel
+@{
+}
+
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3">Number of latest items:</span>
+    </div>
+    <input type="number" class="form-control" id="countTextField" value="100" />
+    <div class="input-group-append">
+        <button class="btn btn-success" id="fetchButton">Fetch</button>
+    </div>
+</div>
+
+<table id="resultsTable" class="search-table sortable">
+    <tr>
+        <th>Title</th>
+        <th>Date Posted</th>
+        <th>Download Links</th>
+    </tr>
+</table>
+
+<script type="text/javascript">
+    $("#fetchButton").click(function () {
+        var count = $("#countTextField").val();
+
+        $('<div>', { class: "loader", id: "loader" }).appendTo($("#fetchButton"));
+        $("#fetchButton").prop('disabled', true);
+        $("#fetchButton").addClass('disabled');
+
+        grindarr.actions.getLatestItems(count, function (data, errData) {
+            $("#loader").remove();
+            $("#fetchButton").prop('disabled', false);
+            $("#fetchButton").removeClass('disabled');
+
+            if (errData == null) {
+                displayFetchedResults($("item", data));
+            } else {
+                var fakeItem = $('<tr>');
+
+                $('<td>', { text: "Error fetching: " + errData.errorMessage }).appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
+                $('<td>').appendTo(fakeItem);
+
+                fakeItem.appendTo($("#resultsTable"));
+            }
+        });
+    });
+
+    function displayFetchedResults(data) {
+        var resultsTable = $("#resultsTable");
+        $("#resultsTable tr").not(":first").remove(); // Preserve header
+
+        // Add items
+        $.each(data, function (idx, entryNode) {
+            var entry = $(entryNode);
+            var tr = $('<tr>');
+
+            var sourceLink = $('<a>');
+            sourceLink.attr("href", entry.find("link").text());
+            sourceLink.attr("title", entry.find("title").text());
+            sourceLink.attr("target", "_blank");
+            sourceLink.text(entry.find("title").text());
+            var sourceLinkTd = $('<td>');
+            sourceLink.appendTo(sourceLinkTd);
+            sourceLinkTd.appendTo(tr);
+
+            $('<td>', { text: entry.find("pubDate").text() }).appendTo(tr);
+
+            var dlLinksTd = $('<td>');
+            var dlLinksUl = $('<ul>');
+            $.each(entry.find("downloadLink"), function (k, linkNode) {
+                var link = $(linkNode).text();
+                var linkElement = $('<a>');
+                linkElement.attr("href", "#");
+                linkElement.attr("title", link);
+                linkElement.text(link);
+                linkElement.click(function () {
+                    var contentItem = {
+                        title: entry.find("title").text(),
+                        source: entry.find("link").text(),
+                        downloadLinks: [link],
+                        reportedSizeInBytes: 0,
+                    };
+
+                    grindarr.createDownload(contentItem, function (data, errData) {
+                        if (errData == null) {
+                            var elem = $('<p>', { class: 'create-download-check save-success-check-fadein' });
+                            elem.html("&#10004;");
+                            elem.appendTo(linkElement);
+                            setTimeout(function () {
+                                elem.removeClass("save-success-check-fadein");
+                                elem.addClass("save-success-check-fadeout");
+                                setTimeout(function () {
+                                    elem.remove();
+                                }, 750);
+                            }, 750);
+                        } else {
+                            alert("Failed to create download: " + errData.errorMessage);
+                        }
+                    });
+
+                    return false;
+                });
+                var li = $('<li>');
+                linkElement.appendTo(li);
+                li.appendTo(dlLinksUl);
+            });
+            dlLinksUl.appendTo(dlLinksTd);
+            dlLinksTd.appendTo(tr);
+
+            tr.appendTo(resultsTable);
+        });
+        sorttable.makeSortable(document.getElementById("resultsTable"));
+    }
+</script>

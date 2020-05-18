@@ -46,7 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Soulseek", "Soulseek", "{B9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Soulseek", "lib\Soulseek.NET\src\Soulseek\Soulseek.csproj", "{F4D9D870-A509-463B-90D4-8D9D6CC340FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grindarr.Soulseek.Tests", "src\Grindarr.Soulseek.Tests\Grindarr.Soulseek.Tests.csproj", "{BD8A8642-0AB9-4F3C-9C31-48F12946E86A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Soulseek.Tests", "src\Grindarr.Soulseek.Tests\Grindarr.Soulseek.Tests.csproj", "{BD8A8642-0AB9-4F3C-9C31-48F12946E86A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -30,6 +30,7 @@ var grindarr = (function () {
         WEB_ROOT: '/api/',
 
         ENDPOINT_ACTIONS_SEARCH: 'actions/search/',
+        ENDPOINT_FEED_GET: 'feed',
 
         ENDPOINT_DOWNLOAD_INDEX: 'download',
         ENDPOINT_DOWNLOAD_GET: 'download/',
@@ -301,6 +302,10 @@ var grindarr = (function () {
             search: function (query, count = 100, cb) {
                 // TODO: fix url construction...
                 return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_ACTIONS_SEARCH + query + "?count=" + count, null, cb, "POST");
+            },
+
+            getLatestItems: function (count = 100, cb) {
+                return grindarr.authenticatedRequest(grindarr.WEB_ROOT + grindarr.ENDPOINT_FEED_GET + "?count=" + count, null, cb);
             }
         },
     }
