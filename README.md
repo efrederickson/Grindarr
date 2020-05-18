@@ -12,7 +12,7 @@ The web portion should be reverse-proxied through something that can provide sec
 
 Downloaders:
 
-- [ ] Soulseek
+- [X] Soulseek
 - [ ] Dropbox
 - [ ] MEGA
 - [ ] Mediafire
@@ -24,7 +24,7 @@ Scrapers (Search):
 - [X] Generic Apache open directory
 - [X] Generic Nginx open directory
 - [X] getcomics.info
-- [ ] Soulseek
+- [X] Soulseek
 
 Web APIs:
 
@@ -43,9 +43,9 @@ Core:
 
 Basically how the system works is like this:
 
-A `scraper` will return a list of `ContentItem`s which contain meta data about an item (like the title, date, download links). 
-The `ContentItem`s are then returned to the client and ones that are desired to be downloaded can be `POST`ed to the download endpoint, 
-where they will be turned into a `DownloadItem`, where the best download link from the list provided will be selected and added to the queue. 
+A `scraper` will return a list of `IContentItem`s which contain meta data about an item (like the title, date, download links). 
+The `IContentItem`s are then returned to the client and ones that are desired to be downloaded can be `POST`ed to the download endpoint, 
+where they will be turned into an `IDownloadItem`, where the best download link from the list provided will be selected and added to the queue. 
 The download link selected is based off of matching the domain against the registered downloaders (e.g. MEGA, Dropbox). 
 The download will commence, and if successful, a series of `IPostProcessor`s will be run against, doing things like moving it to the completed folder, etc. 
 
