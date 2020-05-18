@@ -63,12 +63,9 @@ namespace Grindarr.Soulseek
             {
                 foreach (var resultItem in result.Files.Where(i => i.Size > 0))
                 {
-                    var fakeLink = $"slsk://{result.Username}@soulseek/{resultItem.Filename}";
-                    if (!Uri.TryCreate(fakeLink, UriKind.Absolute, out Uri fakeUri))
-                    {
-                        Console.WriteLine($"Failed to create fake slsk url: {fakeLink}");
+                    var fakeUri = FakeSoulseekUriBuilder.BuildFrom(result.Username, resultItem);
+                    if (fakeUri == null)
                         continue;
-                    }
 
                     var ssItem = ContentItemStore.GetOrCreateByDownloadUrl<SoulseekContentItem>(fakeUri);
                     ssItem.SoulseekUsername = result.Username;

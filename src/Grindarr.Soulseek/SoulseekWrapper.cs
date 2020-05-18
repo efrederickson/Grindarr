@@ -34,17 +34,17 @@ namespace Grindarr.Soulseek
         /// <returns></returns>
         private SoulseekClient GetOrInitializeClient()
         {
-            if (client == null)
+            client ??= new SoulseekClient(new SoulseekClientOptions());
+
+            if (client.State != SoulseekClientStates.LoggedIn)
             {
-                var username = Config.Instance.GetValue<string>(CONFIG_USERNAME, default);
-                var password = Config.Instance.GetValue<string>(CONFIG_PASSWORD, default);
+                var username = GetUsername();
+                var password = GetPassword();
 
                 if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
-                {
-                    client = new SoulseekClient(new SoulseekClientOptions());
                     client.ConnectAsync(username, password).Wait();
-                }
             }
+
             return client;
         }
 

@@ -27,6 +27,9 @@ namespace Grindarr.Core.Downloaders
 
         public DownloadManager() => LoadDownloads();
 
+        /// <summary>
+        /// This method will start or stop downloads, depending on the number of currently active downloads compared to the desired number
+        /// </summary>
         private void UpdateActiveDownloads()
         {
             if (GetActiveDownloads().Count() < MaxSimultaneousDownloads)
@@ -70,6 +73,10 @@ namespace Grindarr.Core.Downloaders
             SaveDownloads();
         }
 
+        /// <summary>
+        /// Private method that contains the actual logic for adding a download
+        /// </summary>
+        /// <param name="item"></param>
         private void InternalAddDownload(IDownloadItem item)
         {
             // Check dirs
@@ -95,6 +102,10 @@ namespace Grindarr.Core.Downloaders
             SaveDownloads();
         }
 
+        /// <summary>
+        /// Returns the downloads that are currently downloading, and if desired, above the download cutoff
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<IDownloadItem> GetActiveDownloads()
         {
             var res = downloads.Values
@@ -111,8 +122,18 @@ namespace Grindarr.Core.Downloaders
 
         public void CancelAll() => DownloadQueue.ToList().ForEach(item => Cancel(item));
 
+        /// <summary>
+        /// Returns a download with the specified guid, assuming it exists, otherwise null
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public IDownloadItem GetById(Guid id) => downloads.Keys.Where(dl => dl.Id == id).FirstOrDefault();
 
+        /// <summary>
+        /// Returns the downloader for a specified download item if it exists, otherwise it throws an exception
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         private IDownloader GetExistingDownload(IDownloadItem item) => DownloadQueue.Contains(item) ? downloads[item] : throw new KeyNotFoundException();
 
         public void Enqueue(IDownloadItem item) => InternalAddDownload(item);
@@ -133,11 +154,14 @@ namespace Grindarr.Core.Downloaders
         private void LoadDownloads()
         {
             if (File.Exists(DLSTATE_PATH))
-                foreach (var dl in JsonConvert.DeserializeObject<IEnumerable<IDownloadItem>>(File.ReadAllText(DLSTATE_PATH), new JsonSerializerSettings()
+            {
+                var loadedDownloads = JsonConvert.DeserializeObject<IEnumerable<IDownloadItem>>(File.ReadAllText(DLSTATE_PATH), new JsonSerializerSettings()
                 {
                     TypeNameHandling = TypeNameHandling.All
-                }))
-                    Enqueue(dl); 
+                });
+                foreach (var dl in loadedDownloads)
+                    Enqueue(dl);
+            }
         }
 
         private void SaveDownloads()

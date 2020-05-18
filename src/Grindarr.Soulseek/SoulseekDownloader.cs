@@ -69,17 +69,19 @@ namespace Grindarr.Soulseek
 
         public void SetItem(IDownloadItem item)
         {
-            SoulseekDownloadItem ssItem = SoulseekDownloadItem.ParseFrom(item);
-            CurrentSSDownloadItem = ssItem;
-            ssItem.DownloadingFilename = HttpUtility.UrlDecode(item.DownloadUri.Segments.Last());
-            ssItem.CompletedFilename = item.DownloadingFilename;
+            CurrentSSDownloadItem = SoulseekDownloadItem.ParseFrom(item);
+            item.DownloadingFilename = HttpUtility.UrlDecode(item.DownloadUri.Segments.Last());
+            item.CompletedFilename = item.DownloadingFilename;
 
-            ssItem.Progress = new DownloadProgress
+            item.Progress = new DownloadProgress
             {
                 BytesTotal = 0,
                 BytesDownloaded = 0,
                 Status = DownloadStatus.Pending
             };
+
+            // Now it's ready, invoke the handler to get download manager to start (or update)
+            DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         private async void StartWorkerAsync()
@@ -129,7 +131,7 @@ namespace Grindarr.Soulseek
                 {
                     // TODO... 
                     Console.WriteLine("Did not create task - assuming Soulseek authentication has not been set");
-                    throw new InvalidOperationException("Please configure soulseek via the scraper (username/password)");
+                    throw new InvalidOperationException("Unable to create download task");
                 }
                 bytes = await task;
             } 
@@ -144,9 +146,6 @@ namespace Grindarr.Soulseek
 
             if (bytes != null)
             {
-                // Normalize path
-                //var normalizedPath = CurrentSSDownloadItem.SoulseekFilename.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
-
                 System.IO.File.WriteAllBytes(CurrentSSDownloadItem.GetDownloadingPath(), bytes);
                 CurrentDownloadItem.Progress.Status = DownloadStatus.Completed;
                 DownloadComplete?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));

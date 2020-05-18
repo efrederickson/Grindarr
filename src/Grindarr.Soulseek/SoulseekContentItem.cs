@@ -1,4 +1,5 @@
 ﻿using Grindarr.Core;
+using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Text;

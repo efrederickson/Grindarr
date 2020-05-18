@@ -37,6 +37,7 @@ namespace Grindarr.Core.PostProcessors
         /// <param name="pp"></param>
         /// <param name="enableState"></param>
         /// <returns></returns>
+        /// <exception cref="InvalidOperationException">Thrown when the post processor does not belong to this manager or is mandatory</exception>
         public void SetPostProcessorEnableState(IPostProcessor pp, bool enableState)
         {
             if (!PostProcessors.Contains(pp))

@@ -5,7 +5,7 @@ using System.Linq;
 namespace Grindarr.Core.Collections
 {
     /// <summary>
-    /// This is a class to provide domain to <code>T</code> mappings, for example domain to <code>IDownloader</code>
+    /// This is a class to provide domain to T mappings, for example domain to IDownloader
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TDefault"></typeparam>

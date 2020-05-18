@@ -24,11 +24,6 @@ namespace Grindarr.Core
             _valueDelay = valueDelay;
         }
 
-        public void NewFile()
-        {
-            _previousProgress = 0;
-        }
-
         public void SetProgress(long bytesReceived)
         {
             long diff = bytesReceived - _previousProgress;
