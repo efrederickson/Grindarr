@@ -1,4 +1,5 @@
 ﻿using Grindarr.Core;
+using Grindarr.Core.Logging;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace Grindarr.Soulseek
             var fakeLink = $"slsk://{urlSafeUsername}@soulseek/{urlSafeFilename}";
             if (!Uri.TryCreate(fakeLink, UriKind.Absolute, out Uri fakeUri))
             {
-                Console.WriteLine($"Failed to create fake slsk url: {fakeLink}");
+                Log.WriteLine($"Failed to create fake slsk url: {fakeLink}");
             }
             return fakeUri;
         }

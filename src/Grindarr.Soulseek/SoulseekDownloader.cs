@@ -1,5 +1,6 @@
 ﻿using Grindarr.Core;
 using Grindarr.Core.Downloaders;
+using Grindarr.Core.Logging;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -123,7 +124,7 @@ namespace Grindarr.Soulseek
                                     DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
                                     break;
                                 case TransferStates.Completed:
-                                    Console.WriteLine($"Finished {CurrentDownloadItem.DownloadUri}");
+                                    Log.WriteLine($"Finished {CurrentDownloadItem.DownloadUri}");
                                     break;
                                 default:
                                     break;
@@ -141,14 +142,14 @@ namespace Grindarr.Soulseek
                 if (task == null)
                 {
                     // TODO... 
-                    Console.WriteLine("Did not create task - assuming Soulseek authentication has not been set");
+                    Log.WriteLine("Did not create task - assuming Soulseek authentication has not been set");
                     throw new InvalidOperationException("Unable to create download task");
                 }
                 await task;
             } 
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception occured during soulseek download for {CurrentSSDownloadItem.SoulseekFilename}: {ex.Message}");
+                Log.WriteLine($"Exception occured during soulseek download for {CurrentSSDownloadItem.SoulseekFilename}: {ex.Message}\n--> Stack trace: {ex.StackTrace}");
                 thrownException = ex;
             }
             finally

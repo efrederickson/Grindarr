@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Grindarr.Core.Logging;
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace Grindarr.Core.Utilities
                     if (!string.IsNullOrEmpty(key))
                     {
                         var redirect = httpResp.GetResponseHeader(key);
-                        Console.WriteLine("Following redirect to: " + redirect);
+                        Log.WriteLine("Following redirect to: " + redirect);
                         var newUrl = new Uri(redirect);
                         return await ResolveAsync(newUrl);
                     }

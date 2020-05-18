@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Grindarr.Core.Logging;
 using Newtonsoft.Json;
 
 namespace Grindarr.Core.Downloaders
@@ -64,7 +65,7 @@ namespace Grindarr.Core.Downloaders
         private void IDownloader_DownloadFailed(object sender, DownloadEventArgs e)
         {
             UpdateActiveDownloads();
-            Console.WriteLine($"Failed: {e.Target.DownloadUri}");
+            Log.WriteLine($"Download failed: {e.Target.DownloadUri}");
             if (e.Target.Progress.Status == DownloadStatus.Canceled)
                 downloads.Remove(e.Target);
             if (File.Exists(e.Target.GetDownloadingPath()))

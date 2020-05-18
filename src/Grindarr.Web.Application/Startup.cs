@@ -43,6 +43,8 @@ namespace Grindarr.Web.Application
             new Grindarr.Soulseek.SoulseekScraper();
             Grindarr.Core.Downloaders.DownloaderFactory.Register("zippyshare.com", new Grindarr.Core.Downloaders.Zippyshare.ZippyshareDownloader());
             Grindarr.Core.Downloaders.DownloaderFactory.Register("soulseek", new Grindarr.Soulseek.SoulSeekDownloader());
+
+            Core.Logging.Log.WriteLine("Grindarr Web Application loading...");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

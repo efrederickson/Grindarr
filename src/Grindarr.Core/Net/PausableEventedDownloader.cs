@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Grindarr.Core.Logging;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -177,7 +178,7 @@ namespace Grindarr.Core.Net
                     var redirect = httpResp.GetResponseHeader("Location");
                     if (!string.IsNullOrEmpty(redirect))
                     {
-                        Console.WriteLine("Following redirect to: " + redirect);
+                        Log.WriteLine("Following redirect to: " + redirect);
                         var newUrl = new Uri(redirect);
                         var newFn = newUrl.Segments.Last();
                         ReceivedResponseFilename?.Invoke(this, new ResponseFilenameEventArgs(HttpUtility.UrlDecode(newFn)));
