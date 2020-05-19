@@ -36,7 +36,14 @@ namespace Grindarr.Soulseek
         {
             lock (this)
             {
-                client ??= new SoulseekClient(new SoulseekClientOptions());
+                client ??= new SoulseekClient(
+                    new SoulseekClientOptions(
+                        messageTimeout: 15000,
+                        serverConnectionOptions: new ConnectionOptions(
+                            connectTimeout: 15000
+                            )
+                        )
+                    );
 
                 if (!client.State.HasFlag(SoulseekClientStates.LoggedIn))
                 {
