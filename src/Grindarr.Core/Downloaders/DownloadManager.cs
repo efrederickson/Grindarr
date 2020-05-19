@@ -21,8 +21,7 @@ namespace Grindarr.Core.Downloaders
 
         private readonly Dictionary<IDownloadItem, IDownloader> downloads = new Dictionary<IDownloadItem, IDownloader>();
 
-        public event EventHandler<DownloadEventArgs> DownloadCompleted;
-        public event EventHandler<DownloadEventArgs> DownloadFailed;
+        public event EventHandler<DownloadEventArgs> DownloadStatusChanged;
         public event EventHandler<DownloadEventArgs> DownloadAdded;
         public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
 
@@ -53,24 +52,25 @@ namespace Grindarr.Core.Downloaders
             DownloadProgressChanged?.Invoke(sender, e);
         }
 
-        private void IDownloader_DownloadCompleted(object sender, DownloadEventArgs e)
+        private void IDownloader_DownloadStatusChanged(object sender, DownloadEventArgs e)
         {
             UpdateActiveDownloads();
-            downloads.Remove(e.Target);
-            PostProcessors.PostProcessorManager.Instance.Run(e.Target); // TODO: move this somewhere better?
-            DownloadCompleted?.Invoke(sender, e);
-            SaveDownloads();
-        }
+            if (e.Target.Progress.Status == DownloadStatus.Completed)
+            {
+                downloads.Remove(e.Target);
+                PostProcessors.PostProcessorManager.Instance.Run(e.Target);
+            }
+            else if (e.Target.Progress.Status == DownloadStatus.Failed)
+            {
+                Log.WriteLine($"Download failed: {e.Target.DownloadUri}");
+                if (File.Exists(e.Target.GetDownloadingPath()))
+                    File.Delete(e.Target.GetDownloadingPath());
+            }
 
-        private void IDownloader_DownloadFailed(object sender, DownloadEventArgs e)
-        {
-            UpdateActiveDownloads();
-            Log.WriteLine($"Download failed: {e.Target.DownloadUri}");
             if (e.Target.Progress.Status == DownloadStatus.Canceled)
                 downloads.Remove(e.Target);
-            if (File.Exists(e.Target.GetDownloadingPath()))
-               File.Delete(e.Target.GetDownloadingPath());
-            DownloadFailed?.Invoke(sender, e);
+
+            DownloadStatusChanged?.Invoke(this, e);
             SaveDownloads();
         }
 
@@ -92,8 +92,7 @@ namespace Grindarr.Core.Downloaders
 
             // Register events
             dl.DownloadProgressChanged += IDownloader_DownloadProgressChanged;
-            dl.DownloadComplete += IDownloader_DownloadCompleted;
-            dl.DownloadFailed += IDownloader_DownloadFailed;
+            dl.DownloadStatusChanged += IDownloader_DownloadStatusChanged;
 
             downloads[dl.CurrentDownloadItem] = dl;
             // Fire event

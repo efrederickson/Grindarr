@@ -22,8 +22,7 @@ namespace Grindarr.Soulseek
 
         public SoulseekDownloadItem CurrentSSDownloadItem { get; private set; }
 
-        public event EventHandler<DownloadEventArgs> DownloadComplete;
-        public event EventHandler<DownloadEventArgs> DownloadFailed;
+        public event EventHandler<DownloadEventArgs> DownloadStatusChanged;
         public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
 
         private CancellationTokenSource cancellationToken = null;
@@ -33,7 +32,7 @@ namespace Grindarr.Soulseek
             if (cancellationToken != null)
                 cancellationToken.Cancel();
             CurrentDownloadItem.Progress.Status = DownloadStatus.Canceled;
-            DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+            DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         public void Pause()
@@ -46,7 +45,7 @@ namespace Grindarr.Soulseek
                 cancellationToken.Cancel();
 
                 CurrentDownloadItem.Progress.Status = DownloadStatus.Paused;
-                DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
             }
         }
 
@@ -64,12 +63,14 @@ namespace Grindarr.Soulseek
             {
                 StartWorkerAsync();
                 CurrentDownloadItem.Progress.Status = DownloadStatus.Downloading;
-                DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
             }
         }
 
         public void SetItem(IDownloadItem item)
         {
+            // I keep making this mistake - the ParseFrom method can return a new IDownloadItem, so then referencing `item` after
+            // that references the old one, and so setting the values on that doesn't help anything... 
             CurrentSSDownloadItem = SoulseekDownloadItem.ParseFrom(item);
             CurrentSSDownloadItem.DownloadingFilename = HttpUtility.UrlDecode(CurrentSSDownloadItem.DownloadUri.Segments.Last());
             CurrentSSDownloadItem.CompletedFilename = CurrentSSDownloadItem.DownloadingFilename;
@@ -80,6 +81,8 @@ namespace Grindarr.Soulseek
                 BytesDownloaded = 0,
                 Status = DownloadStatus.Pending
             };
+
+            DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         private async void StartWorkerAsync()
@@ -121,7 +124,7 @@ namespace Grindarr.Soulseek
                                 case TransferStates.Errored:
                                 case TransferStates.Cancelled:
                                     CurrentDownloadItem.Progress.Status = DownloadStatus.Failed;
-                                    DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                                    DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
                                     break;
                                 case TransferStates.Completed:
                                     Log.WriteLine($"Finished {CurrentDownloadItem.DownloadUri}");
@@ -162,13 +165,13 @@ namespace Grindarr.Soulseek
                 {
                     // Failed
                     CurrentDownloadItem.Progress.Status = DownloadStatus.Failed;
-                    DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                    DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
                 } 
                 else
                 {
                     // Success
                     CurrentDownloadItem.Progress.Status = DownloadStatus.Completed;
-                    DownloadComplete?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                    DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
                 }
             }
         }

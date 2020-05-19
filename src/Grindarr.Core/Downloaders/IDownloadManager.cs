@@ -18,9 +18,9 @@ namespace Grindarr.Core.Downloaders
         /// </summary>
         public IEnumerable<IDownloadItem> DownloadQueue { get; }
 
-        public event EventHandler<DownloadEventArgs> DownloadCompleted;
-        public event EventHandler<DownloadEventArgs> DownloadFailed;
+        public event EventHandler<DownloadEventArgs> DownloadStatusChanged;
         public event EventHandler<DownloadEventArgs> DownloadAdded;
+        public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
 
         /// <summary>
         /// Returns the specified download, if that item belongs to this download manager

@@ -13,15 +13,14 @@ namespace Grindarr.Core.Downloaders.Implementations
 
         public IDownloadItem CurrentDownloadItem { get; private set; }
 
-        public event EventHandler<DownloadEventArgs> DownloadComplete;
-        public event EventHandler<DownloadEventArgs> DownloadFailed;
+        public event EventHandler<DownloadEventArgs> DownloadStatusChanged;
         public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
 
         public virtual void Cancel()
         {
             downloader.Stop();
             CurrentDownloadItem.Progress.Status = DownloadStatus.Canceled;
-            DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+            DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         public virtual void Pause()
@@ -31,7 +30,7 @@ namespace Grindarr.Core.Downloaders.Implementations
 
             downloader.Pause();
             CurrentDownloadItem.Progress.Status = DownloadStatus.Paused;
-            DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+            DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         public virtual void Resume()
@@ -41,7 +40,7 @@ namespace Grindarr.Core.Downloaders.Implementations
 
             downloader.Resume();
             CurrentDownloadItem.Progress.Status = DownloadStatus.Downloading;
-            DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+            DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         public virtual void SetItem(IDownloadItem item) => SetItem(item, item.DownloadUri);
@@ -64,7 +63,7 @@ namespace Grindarr.Core.Downloaders.Implementations
             };
 
             // Now it's ready, invoke the handler to get download manager to start (or update)
-            DownloadProgressChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+            DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
         }
 
         protected void Downloader_ReceivedResponseFilename(object sender, ResponseFilenameEventArgs e)
@@ -78,12 +77,12 @@ namespace Grindarr.Core.Downloaders.Implementations
             if (downloader.IsDone())
             {
                 CurrentDownloadItem.Progress.Status = DownloadStatus.Completed;
-                DownloadComplete?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
             }
             if (downloader.HasFailed())
             {
                 CurrentDownloadItem.Progress.Status = DownloadStatus.Failed;
-                DownloadFailed?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
+                DownloadStatusChanged?.Invoke(this, new DownloadEventArgs(CurrentDownloadItem));
             }
         }
 

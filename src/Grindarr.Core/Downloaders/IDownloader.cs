@@ -3,32 +3,27 @@
 namespace Grindarr.Core.Downloaders
 {
     /// <summary>
-    /// Interface for classes that are used to download a Uri
+    /// Interface for classes that are used to download a Uri. Single-use for a specific download
     /// </summary>
     public interface IDownloader
     {
         /// <summary>
-        /// This event is raised when the download successfully completes
+        /// This event is raised when the download status changes
         /// </summary>
-        public event EventHandler<DownloadEventArgs> DownloadComplete;
+        public event EventHandler<DownloadEventArgs> DownloadStatusChanged;
 
         /// <summary>
-        /// This event is raised when the download fails or is cancelled
-        /// </summary>
-        public event EventHandler<DownloadEventArgs> DownloadFailed;
-
-        /// <summary>
-        /// This event is raised when the download progress (or state) changes
+        /// This event is raised when the download progress changes
         /// </summary>
         public event EventHandler<DownloadEventArgs> DownloadProgressChanged;
 
         /// <summary>
-        /// The item currently be downloaded by this downloader
+        /// The item currently being downloaded by this downloader
         /// </summary>
         public IDownloadItem CurrentDownloadItem { get; }
 
         /// <summary>
-        /// Reset this downloader to download the specified item
+        /// Configure the downloader to prepare to download the specified item
         /// </summary>
         /// <param name="item">The new item to download</param>
         public void SetItem(IDownloadItem item);

@@ -85,6 +85,9 @@ namespace Grindarr.Core.Net
             StatusChanged?.Invoke(this, new EventArgs());
         }
 
+        /// <summary>
+        /// Kicks off the actual download
+        /// </summary>
         private async void DownloadWorkerAsync()
         {
             try
@@ -128,6 +131,7 @@ namespace Grindarr.Core.Net
             }
             catch (Exception ex) // WebException, IOException
             {
+                Log.WriteLine($"Download failed: {ex.Message}");
                 failed = true;
                 //throw ex;
             }
@@ -139,14 +143,15 @@ namespace Grindarr.Core.Net
 
         private HttpWebResponse GetOrCreateWebStream()
         {
-            if (lastResponse != null)
-                return lastResponse;
+            if (lastResponse != null) return lastResponse;
             HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(Uri);
             if (Progress > 0)
                 httpRequest.AddRange(Progress);
 
             lastResponse = GetUnredirectedResponse(httpRequest);
 
+            // The content disposition header will often contain the filename of the download
+            // We can use this to update the output filename in the case of redirects
             var contentDispositionHeader = lastResponse.Headers.Get("Content-Disposition");
             if (!string.IsNullOrEmpty(contentDispositionHeader))
             {
@@ -170,7 +175,7 @@ namespace Grindarr.Core.Net
                 // We have to manually deal with redirects here because .NET Core does not 
                 // auto redirect https to http in the name of safety. While this is a noble 
                 // effort, and probably the correct to handle it, unfortunately some sites
-                // do not do this and redirect down to https. So this will hopefully handle 
+                // do not do this and redirect down to http. So this will hopefully handle 
                 // that. 
                 var httpResp = ((HttpWebResponse)ex.Response);
                 if ((int)httpResp.StatusCode >= 300 && (int)httpResp.StatusCode < 400)
@@ -194,11 +199,14 @@ namespace Grindarr.Core.Net
             }
         }
 
+        /// <summary>
+        /// Creates a handle to the output file. If the file exists, 
+        /// it will set the progress to the length of the file and append to it
+        /// </summary>
+        /// <returns></returns>
         private Stream GetOrUpdateFileStream()
         {
             FileMode filemode;
-            // For download resume
-            // TODO: this does not work
             if (Progress == 0)
                 filemode = FileMode.CreateNew;
             else
@@ -209,7 +217,6 @@ namespace Grindarr.Core.Net
                 filemode = FileMode.Append;
                 var size = new FileInfo(Filename).Length;
                 Progress = size;
-                //File.Delete(Filename);
             }
             return new FileStream(Filename, filemode);
         }

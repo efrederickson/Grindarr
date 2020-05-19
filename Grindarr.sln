@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Core", "src\Grindarr.Core\Grindarr.Core.csproj", "{C4A49828-D6EE-4825-A2EE-AC5A8DF400C2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.ConsoleApp", "src\Grindarr.ConsoleApp\Grindarr.ConsoleApp.csproj", "{9A55AF15-A977-484F-AA00-80CE2E7B5E45}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper", "src\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper\Grindarr.Core.Scrapers.ApacheOpenDirectoryScraper.csproj", "{F4F6A536-1634-4AFE-8558-EE6253E0A390}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grindarr.Core.Scrapers.NginxOpenDirectoryScraper", "src\Grindarr.Core.Scrapers.NginxOpenDirectoryScraper\Grindarr.Core.Scrapers.NginxOpenDirectoryScraper.csproj", "{7A58C10A-D72B-4892-AF28-F205EF526545}"
@@ -58,10 +56,6 @@ Global
 		{C4A49828-D6EE-4825-A2EE-AC5A8DF400C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4A49828-D6EE-4825-A2EE-AC5A8DF400C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4A49828-D6EE-4825-A2EE-AC5A8DF400C2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9A55AF15-A977-484F-AA00-80CE2E7B5E45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A55AF15-A977-484F-AA00-80CE2E7B5E45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A55AF15-A977-484F-AA00-80CE2E7B5E45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A55AF15-A977-484F-AA00-80CE2E7B5E45}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F4F6A536-1634-4AFE-8558-EE6253E0A390}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F4F6A536-1634-4AFE-8558-EE6253E0A390}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4F6A536-1634-4AFE-8558-EE6253E0A390}.Release|Any CPU.ActiveCfg = Release|Any CPU
